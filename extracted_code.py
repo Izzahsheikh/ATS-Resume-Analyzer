@@ -1,8 +1,10 @@
 """
 AI ATS Resume Analyzer — Streamlit UI (Hybrid Scoring Version)
 ---------------------------------------------------------------
-Scoring is deterministic (math-based, consistent every run).
-Gemini is used only for qualitative feedback (matched/missing skills, suggestions).
+- Gemini extracts required skills from JD (domain-aware, not generic keywords)
+- Math computes all scores deterministically
+- Gemini also provides matched/missing skills and suggestions
+- Scores are stable and consistent every run
 
 Run with:
     streamlit run extracted_code.py
@@ -25,7 +27,6 @@ from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 
-# Load API key from .env automatically
 load_dotenv()
 
 # --------------------------------------------------------------------------
@@ -61,176 +62,6 @@ def extract_text_from_uploaded(uploaded_file) -> str:
         return uploaded_file.read().decode("utf-8", errors="ignore")
 
 
-def clean_text(text: str) -> str:
-    text = text.lower()
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    return text
-
-
-# --------------------------------------------------------------------------
-# DETERMINISTIC SCORING (consistent every run)
-# --------------------------------------------------------------------------
-def compute_tfidf_similarity(resume_text: str, jd_text: str) -> int:
-    """Cosine similarity between resume and JD using TF-IDF. Always same result."""
-    vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf = vectorizer.fit_transform([clean_text(jd_text), clean_text(resume_text)])
-    score = cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0]
-    return round(score * 100)
-
-
-def extract_keywords(text: str) -> set:
-    """Extract meaningful keywords from text."""
-    words = clean_text(text).split()
-    # Filter short words and common stop words
-    stop = {"and", "or", "the", "a", "an", "in", "on", "at", "to", "for",
-            "of", "with", "is", "are", "was", "were", "be", "been", "have",
-            "has", "had", "will", "would", "can", "could", "should", "may",
-            "might", "must", "shall", "that", "this", "these", "those",
-            "we", "our", "you", "your", "they", "their", "it", "its"}
-    return {w for w in words if len(w) > 2 and w not in stop}
-
-
-def compute_keyword_match(resume_text: str, jd_text: str) -> int:
-    """What % of JD keywords appear in the resume. Deterministic."""
-    jd_keywords = extract_keywords(jd_text)
-    resume_keywords = extract_keywords(resume_text)
-    if not jd_keywords:
-        return 0
-    matched = jd_keywords & resume_keywords
-    return round(len(matched) / len(jd_keywords) * 100)
-
-
-def score_education(resume_text: str) -> int:
-    """Check for education keywords."""
-    text = resume_text.lower()
-    if any(w in text for w in ["phd", "doctorate"]):
-        return 100
-    elif any(w in text for w in ["master", "msc", "ms ", "m.s", "mba"]):
-        return 85
-    elif any(w in text for w in ["bachelor", "bsc", "b.s", "b.e", "beng", "degree"]):
-        return 70
-    elif any(w in text for w in ["diploma", "associate"]):
-        return 50
-    return 30
-
-
-def score_experience(resume_text: str, jd_text: str) -> int:
-    """
-    Extract years of experience mentioned in resume vs what JD requires.
-    Falls back to keyword presence scoring.
-    """
-    # Try to find years of experience in resume
-    resume_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", resume_text.lower())
-    jd_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", jd_text.lower())
-
-    if resume_years and jd_years:
-        candidate_exp = max(int(y) for y in resume_years)
-        required_exp = max(int(y) for y in jd_years)
-        if candidate_exp >= required_exp:
-            return 100
-        else:
-            return round((candidate_exp / required_exp) * 100)
-
-    # Fallback: keyword-based
-    text = resume_text.lower()
-    if any(w in text for w in ["senior", "lead", "principal", "head of", "manager"]):
-        return 85
-    elif any(w in text for w in ["mid", "intermediate", "engineer", "developer", "analyst"]):
-        return 65
-    elif any(w in text for w in ["junior", "intern", "trainee", "fresher", "graduate"]):
-        return 40
-    return 50
-
-
-def score_projects(resume_text: str) -> int:
-    """Check for projects section and depth."""
-    text = resume_text.lower()
-    has_projects = "project" in text
-    has_github = any(w in text for w in ["github", "gitlab", "bitbucket"])
-    has_deployed = any(w in text for w in ["deployed", "production", "live", "published"])
-    score = 0
-    if has_projects:
-        score += 50
-    if has_github:
-        score += 25
-    if has_deployed:
-        score += 25
-    return score
-
-
-def score_formatting(resume_text: str) -> int:
-    """Rough formatting quality check."""
-    lines = [l.strip() for l in resume_text.splitlines() if l.strip()]
-    score = 50  # base
-    if len(lines) > 20:
-        score += 15   # has enough content
-    if any(w in resume_text.lower() for w in ["experience", "education", "skills", "projects"]):
-        score += 20   # has clear sections
-    if any(w in resume_text.lower() for w in ["@", "email", "phone", "linkedin"]):
-        score += 15   # has contact info
-    return min(score, 100)
-
-
-def compute_deterministic_scores(resume_text: str, jd_text: str) -> dict:
-    """All scores computed mathematically — same result every single run."""
-    keyword_score = compute_keyword_match(resume_text, jd_text)
-    tfidf_score = compute_tfidf_similarity(resume_text, jd_text)
-    skill_match = round((keyword_score * 0.6) + (tfidf_score * 0.4))
-    experience_score = score_experience(resume_text, jd_text)
-    education_score = score_education(resume_text)
-    projects_score = score_projects(resume_text)
-    formatting_score = score_formatting(resume_text)
-
-    # Weighted final ATS score
-    ats_score = round(
-        skill_match     * 0.35 +
-        experience_score * 0.25 +
-        education_score  * 0.15 +
-        projects_score   * 0.15 +
-        formatting_score * 0.10
-    )
-
-    return {
-        "ats_score": ats_score,
-        "skill_match": skill_match,
-        "experience_score": experience_score,
-        "education_score": education_score,
-        "projects_score": projects_score,
-        "formatting_score": formatting_score,
-    }
-
-
-# --------------------------------------------------------------------------
-# GEMINI — qualitative feedback only (not scoring)
-# --------------------------------------------------------------------------
-FEEDBACK_PROMPT = PromptTemplate(
-    input_variables=["job_description", "resume_chunks"],
-    template="""
-You are an expert technical recruiter reviewing a resume against a job description.
-
-JOB DESCRIPTION:
-{job_description}
-
-RESUME CONTENT:
-{resume_chunks}
-
-List the skills, tools, and technologies that are:
-1. Present in BOTH the resume and job description (matched)
-2. Required in the job description but MISSING from the resume
-
-Also give 3 specific, actionable suggestions to improve this resume for this role.
-
-Respond with ONLY a valid JSON object (no markdown, no extra text):
-
-{{
-  "matched_skills": ["skill1", "skill2"],
-  "missing_skills": ["skill1", "skill2"],
-  "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
-}}
-""",
-)
-
-
 def parse_json_response(text):
     if isinstance(text, list):
         text = "".join(
@@ -244,52 +75,218 @@ def parse_json_response(text):
     return json.loads(match.group(0))
 
 
+def get_llm():
+    return ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+
+
 @st.cache_resource(show_spinner=False)
 def get_embeddings():
     return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 
-def get_relevant_chunks(resume_text: str, jd_text: str, embeddings) -> str:
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500, chunk_overlap=50, separators=["\n\n", "\n", ".", " "]
-    )
-    chunks = splitter.split_text(resume_text)
-    vectorstore = Chroma.from_texts(texts=chunks, embedding=embeddings)
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
-    relevant = retriever.invoke(jd_text)
-    return "\n\n".join(doc.page_content for doc in relevant)
+# --------------------------------------------------------------------------
+# STEP 1: Extract required skills from JD using Gemini (done once per JD)
+# --------------------------------------------------------------------------
+JD_SKILLS_PROMPT = PromptTemplate(
+    input_variables=["job_description"],
+    template="""
+You are a technical recruiter. Read the job description below and extract the specific
+technical skills, tools, frameworks, and technologies required for this role.
+
+JOB DESCRIPTION:
+{job_description}
+
+Respond with ONLY a valid JSON object (no markdown, no extra text):
+{{
+  "required_skills": ["skill1", "skill2", "skill3"]
+}}
+
+Be specific — include exact tool/framework names like "LangChain", "RAG", "Docker", "PyTorch".
+Do NOT include soft skills like "communication" or "teamwork".
+""",
+)
 
 
-def get_gemini_feedback(resume_text: str, jd_text: str, embeddings) -> dict:
-    """Ask Gemini ONLY for qualitative feedback, not scores."""
-    retrieved = get_relevant_chunks(resume_text, jd_text, embeddings)
-    prompt = FEEDBACK_PROMPT.format(job_description=jd_text, resume_chunks=retrieved)
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0,  # zero temperature = no randomness
-    )
-    response = llm.invoke(prompt)
-    return parse_json_response(response.content)
+@st.cache_data(show_spinner=False)
+def extract_jd_skills(jd_text: str) -> list:
+    """Extract required skills from JD using Gemini. Cached so runs only once."""
+    prompt = JD_SKILLS_PROMPT.format(job_description=jd_text)
+    response = get_llm().invoke(prompt)
+    data = parse_json_response(response.content)
+    return [s.lower() for s in data.get("required_skills", [])]
 
 
 # --------------------------------------------------------------------------
-# MAIN ANALYSIS FUNCTION
+# STEP 2: Deterministic scoring
 # --------------------------------------------------------------------------
-def analyze_resume(resume_text: str, jd_text: str, embeddings) -> dict:
-    # Step 1: deterministic scores (fast, consistent)
-    scores = compute_deterministic_scores(resume_text, jd_text)
+def compute_skill_match(resume_text: str, required_skills: list) -> tuple[int, list, list]:
+    """
+    Check which required skills appear in the resume.
+    Returns (score, matched_list, missing_list).
+    Deterministic — same input always same output.
+    """
+    resume_lower = resume_text.lower()
+    matched = []
+    missing = []
+    for skill in required_skills:
+        # Match whole word or phrase
+        pattern = r'\b' + re.escape(skill) + r'\b'
+        if re.search(pattern, resume_lower):
+            matched.append(skill)
+        else:
+            missing.append(skill)
+    score = round(len(matched) / len(required_skills) * 100) if required_skills else 0
+    return score, matched, missing
 
-    # Step 2: Gemini for human-readable feedback only
+
+def compute_tfidf_similarity(resume_text: str, jd_text: str) -> int:
+    """Cosine similarity between resume and JD. Always same result."""
+    def clean(t):
+        t = t.lower()
+        return t.translate(str.maketrans("", "", string.punctuation))
+    vectorizer = TfidfVectorizer(stop_words="english")
+    tfidf = vectorizer.fit_transform([clean(jd_text), clean(resume_text)])
+    score = cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0]
+    return round(score * 100)
+
+
+def score_education(resume_text: str) -> int:
+    text = resume_text.lower()
+    if any(w in text for w in ["phd", "doctorate"]):
+        return 100
+    elif any(w in text for w in ["master", "msc", "ms ", "m.s", "mba"]):
+        return 85
+    elif any(w in text for w in ["bachelor", "bsc", "b.s", "b.e", "beng", "degree"]):
+        return 70
+    elif any(w in text for w in ["diploma", "associate"]):
+        return 50
+    return 30
+
+
+def score_experience(resume_text: str, jd_text: str) -> int:
+    resume_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", resume_text.lower())
+    jd_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", jd_text.lower())
+    if resume_years and jd_years:
+        candidate_exp = max(int(y) for y in resume_years)
+        required_exp = max(int(y) for y in jd_years)
+        if candidate_exp >= required_exp:
+            return 100
+        return round((candidate_exp / required_exp) * 100)
+    text = resume_text.lower()
+    if any(w in text for w in ["senior", "lead", "principal", "head of", "manager"]):
+        return 85
+    elif any(w in text for w in ["engineer", "developer", "analyst", "apprentice"]):
+        return 65
+    elif any(w in text for w in ["junior", "intern", "trainee", "fresher", "graduate"]):
+        return 40
+    return 50
+
+
+def score_projects(resume_text: str) -> int:
+    text = resume_text.lower()
+    score = 0
+    if "project" in text:
+        score += 50
+    if any(w in text for w in ["github", "gitlab", "bitbucket"]):
+        score += 25
+    if any(w in text for w in ["deployed", "production", "live", "published"]):
+        score += 25
+    return score
+
+
+def score_formatting(resume_text: str) -> int:
+    lines = [l.strip() for l in resume_text.splitlines() if l.strip()]
+    score = 50
+    if len(lines) > 20:
+        score += 15
+    if any(w in resume_text.lower() for w in ["experience", "education", "skills", "projects"]):
+        score += 20
+    if any(w in resume_text.lower() for w in ["@", "email", "phone", "linkedin"]):
+        score += 15
+    return min(score, 100)
+
+
+# --------------------------------------------------------------------------
+# STEP 3: Gemini suggestions (qualitative only, not scoring)
+# --------------------------------------------------------------------------
+SUGGESTIONS_PROMPT = PromptTemplate(
+    input_variables=["job_description", "resume_text", "missing_skills"],
+    template="""
+You are an expert technical recruiter. A candidate is applying for the following role.
+
+JOB DESCRIPTION:
+{job_description}
+
+RESUME:
+{resume_text}
+
+MISSING SKILLS (already identified):
+{missing_skills}
+
+Give 3 specific, actionable suggestions to improve this resume for this role.
+Focus on what the candidate should ADD, LEARN, or HIGHLIGHT.
+
+Respond with ONLY a valid JSON object (no markdown):
+{{
+  "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
+}}
+""",
+)
+
+
+def get_suggestions(resume_text: str, jd_text: str, missing_skills: list) -> list:
+    prompt = SUGGESTIONS_PROMPT.format(
+        job_description=jd_text,
+        resume_text=resume_text[:3000],  # limit tokens
+        missing_skills=", ".join(missing_skills) if missing_skills else "None",
+    )
     try:
-        feedback = get_gemini_feedback(resume_text, jd_text, embeddings)
+        response = get_llm().invoke(prompt)
+        data = parse_json_response(response.content)
+        return data.get("suggestions", [])
     except Exception:
-        feedback = {
-            "matched_skills": [],
-            "missing_skills": [],
-            "suggestions": ["Could not generate suggestions. Check your API key."],
-        }
+        return ["Could not generate suggestions. Check your API key."]
 
-    return {**scores, **feedback, "final_score": scores["ats_score"]}
+
+# --------------------------------------------------------------------------
+# MAIN ANALYSIS
+# --------------------------------------------------------------------------
+def analyze_resume(resume_text: str, jd_text: str, required_skills: list) -> dict:
+    # Skill match using JD-extracted skills (domain-aware)
+    skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
+
+    # Boost skill score with TF-IDF similarity
+    tfidf_score = compute_tfidf_similarity(resume_text, jd_text)
+    combined_skill = round(skill_score * 0.7 + tfidf_score * 0.3)
+
+    experience_score = score_experience(resume_text, jd_text)
+    education_score = score_education(resume_text)
+    projects_score = score_projects(resume_text)
+    formatting_score = score_formatting(resume_text)
+
+    ats_score = round(
+        combined_skill   * 0.40 +
+        experience_score * 0.25 +
+        education_score  * 0.15 +
+        projects_score   * 0.12 +
+        formatting_score * 0.08
+    )
+
+    # Gemini only for suggestions
+    suggestions = get_suggestions(resume_text, jd_text, missing)
+
+    return {
+        "ats_score": ats_score,
+        "final_score": ats_score,
+        "skill_match": combined_skill,
+        "experience_score": experience_score,
+        "education_score": education_score,
+        "projects_score": projects_score,
+        "formatting_score": formatting_score,
+        "matched_skills": [s.title() for s in matched],
+        "missing_skills": [s.title() for s in missing],
+        "suggestions": suggestions,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -300,7 +297,6 @@ with st.sidebar:
     shortlist_threshold = st.slider(
         "Shortlist threshold (ATS score %)", min_value=0, max_value=100, value=70
     )
-
 
 # --------------------------------------------------------------------------
 # FILE UPLOADS
@@ -331,10 +327,14 @@ if analyze_clicked:
         st.error("Couldn't extract text from the job description.")
         st.stop()
 
-    embeddings = get_embeddings()
-    results = []
+    # Extract required skills from JD once (cached)
+    with st.spinner("Extracting required skills from job description..."):
+        required_skills = extract_jd_skills(jd_text)
+    st.info(f"📋 **Required skills identified:** {', '.join(s.title() for s in required_skills)}")
 
+    results = []
     progress = st.progress(0.0, text="Starting analysis...")
+
     for i, resume_file in enumerate(resume_files):
         progress.progress(i / len(resume_files), text=f"Analyzing {resume_file.name}...")
         try:
@@ -342,7 +342,7 @@ if analyze_clicked:
             if not resume_text.strip():
                 st.warning(f"Skipping {resume_file.name} — no extractable text.")
                 continue
-            analysis = analyze_resume(resume_text, jd_text, embeddings)
+            analysis = analyze_resume(resume_text, jd_text, required_skills)
             analysis["candidate_name"] = resume_file.name
             results.append(analysis)
         except Exception as e:
