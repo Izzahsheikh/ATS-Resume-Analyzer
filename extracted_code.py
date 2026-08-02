@@ -76,7 +76,7 @@ def parse_json_response(text):
 
 
 def get_llm():
-    return ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+    return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
 
 
 @st.cache_resource(show_spinner=False)
