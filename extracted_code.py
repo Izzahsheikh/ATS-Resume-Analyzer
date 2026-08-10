@@ -321,78 +321,105 @@ def enrich_with_suggestions_parallel(
 # SIDEBAR
 # --------------------------------------------------------------------------
 with st.sidebar:
-    st.header("⚙️ Settings")
+    st.header("Settings")
 
     # ── Shortlist Threshold ─────────────────────────────────────────────────
-    st.markdown("**🎯 Shortlist Threshold**")
+    st.markdown("**Shortlist Threshold**")
     st.caption("Candidates at or above this ATS score will be shortlisted.")
 
-    # Initialise default to 75
     if "threshold" not in st.session_state:
         st.session_state.threshold = 75
 
     col_minus, col_input, col_plus = st.columns([1, 2, 1])
-
     with col_minus:
-        if st.button("➖", use_container_width=True, key="dec_threshold"):
+        if st.button("−", use_container_width=True, key="dec_threshold"):
             st.session_state.threshold = max(0, st.session_state.threshold - 5)
-
     with col_input:
         new_val = st.number_input(
             "Score %",
             min_value=0,
             max_value=100,
             value=st.session_state.threshold,
-            step=1,
+            step=5,
             label_visibility="collapsed",
             key="threshold_input",
         )
         st.session_state.threshold = int(new_val)
-
     with col_plus:
-        if st.button("➕", use_container_width=True, key="inc_threshold"):
+        if st.button("+", use_container_width=True, key="inc_threshold"):
             st.session_state.threshold = min(100, st.session_state.threshold + 5)
 
     shortlist_threshold = st.session_state.threshold
 
-    # Colour badge: green ≥75, amber 50-74, red <50
     if shortlist_threshold >= 75:
-        badge_color = "#1b5e20"
-        text_color  = "#a5d6a7"
+        badge_color = "#1a3d1a"
+        text_color  = "#81c784"
     elif shortlist_threshold >= 50:
-        badge_color = "#4e3400"
-        text_color  = "#ffe082"
+        badge_color = "#3d2e00"
+        text_color  = "#ffcc80"
     else:
-        badge_color = "#4e0000"
-        text_color  = "#ef9a9a"
+        badge_color = "#3d0000"
+        text_color  = "#e57373"
 
     st.markdown(
-        f"""
-        <div style="
+        f"""<div style="
             text-align: center;
-            padding: 8px 12px;
+            padding: 7px 10px;
             background: {badge_color};
-            border-radius: 10px;
-            font-size: 1.15rem;
-            font-weight: 700;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
             color: {text_color};
             margin-top: 6px;
-            letter-spacing: 0.5px;
-        ">
-            Current threshold: {shortlist_threshold}%
-        </div>
-        """,
+        ">Current threshold: {shortlist_threshold}%</div>""",
         unsafe_allow_html=True,
     )
 
     st.markdown("---")
 
     # ── Top-N suggestions ───────────────────────────────────────────────────
-    top_n_suggestions = st.slider(
-        "Generate AI suggestions for top N candidates",
-        min_value=1, max_value=20, value=5,
-        help="LLM is only called for these candidates after ranking. Keeps it fast.",
+    st.markdown("**AI Suggestions — Top Candidates**")
+    st.caption("AI suggestions are generated only for the top N ranked candidates.")
+
+    if "top_n" not in st.session_state:
+        st.session_state.top_n = 5
+
+    col_n_minus, col_n_input, col_n_plus = st.columns([1, 2, 1])
+    with col_n_minus:
+        if st.button("−", use_container_width=True, key="dec_topn"):
+            st.session_state.top_n = max(1, st.session_state.top_n - 1)
+    with col_n_input:
+        new_n = st.number_input(
+            "Top N",
+            min_value=1,
+            max_value=20,
+            value=st.session_state.top_n,
+            step=1,
+            label_visibility="collapsed",
+            key="topn_input",
+        )
+        st.session_state.top_n = int(new_n)
+    with col_n_plus:
+        if st.button("+", use_container_width=True, key="inc_topn"):
+            st.session_state.top_n = min(20, st.session_state.top_n + 1)
+
+    top_n_suggestions = st.session_state.top_n
+
+    st.markdown(
+        f"""<div style="
+            text-align: center;
+            padding: 7px 10px;
+            background: #1a2a3d;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #90caf9;
+            margin-top: 6px;
+        ">Top {top_n_suggestions} candidates</div>""",
+        unsafe_allow_html=True,
     )
+
+    st.markdown("---")
     show_debug = st.checkbox("Show extracted-text debug info", value=False)
 
 
