@@ -56,7 +56,6 @@ def extract_text_from_uploaded(uploaded_file) -> str:
         file_bytes = uploaded_file.read()
         document = docx.Document(io.BytesIO(file_bytes))
         paragraphs = [p.text for p in document.paragraphs if p.text.strip()]
-        # Also extract text from tables
         for table in document.tables:
             for row in table.rows:
                 for cell in row.cells:
@@ -123,22 +122,13 @@ def extract_jd_skills(jd_text: str) -> list:
 # --------------------------------------------------------------------------
 @st.cache_data(show_spinner=False)
 def build_jd_tfidf_cache(jd_text: str):
-    """
-    Returns a cleaned JD string for use in per-resume TF-IDF comparisons.
-    We cache the cleaned version; the vectorizer is fit fresh per batch
-    (unavoidable since sklearn requires the full corpus at fit time).
-    """
     def clean(t):
         t = t.lower()
         return t.translate(str.maketrans("", "", string.punctuation))
     return clean(jd_text)
 
 
-def compute_tfidf_batch(jd_clean: str, resume_texts: list[str]) -> list[int]:
-    """
-    Fit ONE TF-IDF vectorizer on JD + all resumes, then score each resume.
-    Much faster than re-fitting per resume.
-    """
+def compute_tfidf_batch(jd_clean: str, resume_texts: list) -> list:
     def clean(t):
         t = t.lower()
         return t.translate(str.maketrans("", "", string.punctuation))
@@ -160,7 +150,7 @@ def compute_tfidf_batch(jd_clean: str, resume_texts: list[str]) -> list[int]:
 # --------------------------------------------------------------------------
 # STEP 3: Deterministic scoring (no LLM)
 # --------------------------------------------------------------------------
-def compute_skill_match(resume_text: str, required_skills: list) -> tuple[int, list, list]:
+def compute_skill_match(resume_text: str, required_skills: list) -> tuple:
     resume_lower = resume_text.lower()
     matched, missing = [], []
     for skill in required_skills:
@@ -235,7 +225,6 @@ def score_resume_deterministic(
     required_skills: list,
     tfidf_score: int,
 ) -> dict:
-    """All scoring done in Python — no LLM. Safe to run in parallel threads."""
     skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
     combined_skill = round(skill_score * 0.7 + tfidf_score * 0.3)
 
@@ -262,7 +251,7 @@ def score_resume_deterministic(
         "formatting_score": formatting_score,
         "matched_skills": [s.title() for s in matched],
         "missing_skills": [s.title() for s in missing],
-        "suggestions": [],  # filled in Stage 2 for top-N only
+        "suggestions": [],
     }
 
 
@@ -309,15 +298,11 @@ def get_suggestions(resume_text: str, jd_text: str, missing_skills: list) -> lis
 
 
 def enrich_with_suggestions_parallel(
-    results: list[dict],
-    resume_texts: dict[str, str],
+    results: list,
+    resume_texts: dict,
     jd_text: str,
     top_n: int,
 ) -> None:
-    """
-    Fetches AI suggestions for top-N candidates in parallel (in-place mutation).
-    Uses ThreadPoolExecutor — safe since each call is independent I/O.
-    """
     top_results = results[:top_n]
 
     def fetch(r):
@@ -329,23 +314,87 @@ def enrich_with_suggestions_parallel(
     with ThreadPoolExecutor(max_workers=min(top_n, 5)) as executor:
         futures = {executor.submit(fetch, r): r["candidate_name"] for r in top_results}
         for future in as_completed(futures):
-            _ = future.result()  # propagate exceptions if any
+            _ = future.result()
 
 
 # --------------------------------------------------------------------------
 # SIDEBAR
 # --------------------------------------------------------------------------
 with st.sidebar:
-    st.header("Settings")
-    shortlist_threshold = st.slider(
-        "Shortlist threshold (ATS score %)", min_value=0, max_value=100, value=70
+    st.header("⚙️ Settings")
+
+    # ── Shortlist Threshold ─────────────────────────────────────────────────
+    st.markdown("**🎯 Shortlist Threshold**")
+    st.caption("Candidates at or above this ATS score will be shortlisted.")
+
+    # Initialise default to 75
+    if "threshold" not in st.session_state:
+        st.session_state.threshold = 75
+
+    col_minus, col_input, col_plus = st.columns([1, 2, 1])
+
+    with col_minus:
+        if st.button("➖", use_container_width=True, key="dec_threshold"):
+            st.session_state.threshold = max(0, st.session_state.threshold - 5)
+
+    with col_input:
+        new_val = st.number_input(
+            "Score %",
+            min_value=0,
+            max_value=100,
+            value=st.session_state.threshold,
+            step=1,
+            label_visibility="collapsed",
+            key="threshold_input",
+        )
+        st.session_state.threshold = int(new_val)
+
+    with col_plus:
+        if st.button("➕", use_container_width=True, key="inc_threshold"):
+            st.session_state.threshold = min(100, st.session_state.threshold + 5)
+
+    shortlist_threshold = st.session_state.threshold
+
+    # Colour badge: green ≥75, amber 50-74, red <50
+    if shortlist_threshold >= 75:
+        badge_color = "#1b5e20"
+        text_color  = "#a5d6a7"
+    elif shortlist_threshold >= 50:
+        badge_color = "#4e3400"
+        text_color  = "#ffe082"
+    else:
+        badge_color = "#4e0000"
+        text_color  = "#ef9a9a"
+
+    st.markdown(
+        f"""
+        <div style="
+            text-align: center;
+            padding: 8px 12px;
+            background: {badge_color};
+            border-radius: 10px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: {text_color};
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        ">
+            Current threshold: {shortlist_threshold}%
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
+
+    st.markdown("---")
+
+    # ── Top-N suggestions ───────────────────────────────────────────────────
     top_n_suggestions = st.slider(
         "Generate AI suggestions for top N candidates",
         min_value=1, max_value=20, value=5,
         help="LLM is only called for these candidates after ranking. Keeps it fast.",
     )
     show_debug = st.checkbox("Show extracted-text debug info", value=False)
+
 
 # --------------------------------------------------------------------------
 # FILE UPLOADS
@@ -370,7 +419,7 @@ if analyze_clicked:
         st.error("Please upload at least one resume.")
         st.stop()
 
-    # ── JD processing (cached after first run) ──────────────────────────────
+    # ── JD processing ───────────────────────────────────────────────────────
     with st.spinner("Reading job description..."):
         jd_text = extract_text_from_uploaded(jd_file)
     if not jd_text.strip():
@@ -386,8 +435,8 @@ if analyze_clicked:
     # ── PHASE 1: Parallel PDF extraction ────────────────────────────────────
     progress = st.progress(0.0, text="Extracting resume text in parallel...")
 
-    resume_texts: dict[str, str] = {}
-    failed: list[str] = []
+    resume_texts: dict = {}
+    failed: list = []
 
     def extract_one(rf):
         text = extract_text_from_uploaded(rf)
@@ -415,7 +464,7 @@ if analyze_clicked:
         st.error("No resumes could be read.")
         st.stop()
 
-    # ── PHASE 2: Batch TF-IDF (one vectorizer for all resumes) ──────────────
+    # ── PHASE 2: Batch TF-IDF ───────────────────────────────────────────────
     progress.progress(0.35, text="Computing TF-IDF similarity (batch)...")
     names_ordered = list(resume_texts.keys())
     texts_ordered = [resume_texts[n] for n in names_ordered]
@@ -425,7 +474,7 @@ if analyze_clicked:
     # ── PHASE 3: Parallel deterministic scoring ──────────────────────────────
     progress.progress(0.4, text="Scoring resumes in parallel...")
 
-    results: list[dict] = []
+    results: list = []
 
     def score_one(name):
         text = resume_texts[name]
@@ -452,7 +501,7 @@ if analyze_clicked:
     # ── PHASE 4: Rank ────────────────────────────────────────────────────────
     results.sort(key=lambda r: r["final_score"], reverse=True)
 
-    # ── PHASE 5: LLM suggestions for top-N only (parallel) ──────────────────
+    # ── PHASE 5: LLM suggestions for top-N only ──────────────────────────────
     actual_top_n = min(top_n_suggestions, len(results))
     progress.progress(0.70, text=f"Generating AI suggestions for top {actual_top_n} candidates...")
 
@@ -472,7 +521,7 @@ if analyze_clicked:
 
     for rank, r in enumerate(results, start=1):
         shortlisted = r["final_score"] >= shortlist_threshold
-        badge = "✅ Shortlist" if shortlisted else "❌ Not shortlisted"
+        badge = "✅ Shortlisted" if shortlisted else "❌ Not shortlisted"
         has_suggestions = bool(r.get("suggestions"))
 
         with st.container(border=True):
@@ -515,5 +564,5 @@ if analyze_clicked:
     else:
         st.info("No candidates met the shortlist threshold. Try lowering it in the sidebar.")
 
-    total_llm_calls = 1 + actual_top_n  # 1 for JD skills + top-N suggestions
+    total_llm_calls = 1 + actual_top_n
     st.caption(f"⚡ Total LLM calls this run: **{total_llm_calls}** (1 JD extraction + {actual_top_n} suggestions). All other scoring was deterministic Python.")
