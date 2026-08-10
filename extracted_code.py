@@ -330,94 +330,50 @@ with st.sidebar:
     if "threshold" not in st.session_state:
         st.session_state.threshold = 75
 
-    col_minus, col_input, col_plus = st.columns([1, 2, 1])
+    col_minus, col_val, col_plus = st.columns([1, 2, 1])
     with col_minus:
         if st.button("−", use_container_width=True, key="dec_threshold"):
-            st.session_state.threshold = max(0, st.session_state.threshold - 5)
-    with col_input:
-        new_val = st.number_input(
-            "Score %",
-            min_value=0,
-            max_value=100,
-            value=st.session_state.threshold,
-            step=5,
-            label_visibility="collapsed",
-            key="threshold_input",
+            if st.session_state.threshold > 0:
+                st.session_state.threshold -= 1
+    with col_val:
+        st.markdown(
+            f"<div style='text-align:center; font-size:1.6rem; font-weight:700; padding:4px 0;'>"
+            f"{st.session_state.threshold}%</div>",
+            unsafe_allow_html=True,
         )
-        st.session_state.threshold = int(new_val)
     with col_plus:
         if st.button("+", use_container_width=True, key="inc_threshold"):
-            st.session_state.threshold = min(100, st.session_state.threshold + 5)
+            if st.session_state.threshold < 100:
+                st.session_state.threshold += 1
 
     shortlist_threshold = st.session_state.threshold
-
-    if shortlist_threshold >= 75:
-        badge_color = "#1a3d1a"
-        text_color  = "#81c784"
-    elif shortlist_threshold >= 50:
-        badge_color = "#3d2e00"
-        text_color  = "#ffcc80"
-    else:
-        badge_color = "#3d0000"
-        text_color  = "#e57373"
-
-    st.markdown(
-        f"""<div style="
-            text-align: center;
-            padding: 7px 10px;
-            background: {badge_color};
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: {text_color};
-            margin-top: 6px;
-        ">Current threshold: {shortlist_threshold}%</div>""",
-        unsafe_allow_html=True,
-    )
 
     st.markdown("---")
 
     # ── Top-N suggestions ───────────────────────────────────────────────────
     st.markdown("**AI Suggestions — Top Candidates**")
-    st.caption("AI suggestions are generated only for the top N ranked candidates.")
+    st.caption("AI suggestions generated only for top N ranked candidates.")
 
     if "top_n" not in st.session_state:
         st.session_state.top_n = 5
 
-    col_n_minus, col_n_input, col_n_plus = st.columns([1, 2, 1])
+    col_n_minus, col_n_val, col_n_plus = st.columns([1, 2, 1])
     with col_n_minus:
         if st.button("−", use_container_width=True, key="dec_topn"):
-            st.session_state.top_n = max(1, st.session_state.top_n - 1)
-    with col_n_input:
-        new_n = st.number_input(
-            "Top N",
-            min_value=1,
-            max_value=20,
-            value=st.session_state.top_n,
-            step=1,
-            label_visibility="collapsed",
-            key="topn_input",
+            if st.session_state.top_n > 1:
+                st.session_state.top_n -= 1
+    with col_n_val:
+        st.markdown(
+            f"<div style='text-align:center; font-size:1.6rem; font-weight:700; padding:4px 0;'>"
+            f"{st.session_state.top_n}</div>",
+            unsafe_allow_html=True,
         )
-        st.session_state.top_n = int(new_n)
     with col_n_plus:
         if st.button("+", use_container_width=True, key="inc_topn"):
-            st.session_state.top_n = min(20, st.session_state.top_n + 1)
+            if st.session_state.top_n < 20:
+                st.session_state.top_n += 1
 
     top_n_suggestions = st.session_state.top_n
-
-    st.markdown(
-        f"""<div style="
-            text-align: center;
-            padding: 7px 10px;
-            background: #1a2a3d;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #90caf9;
-            margin-top: 6px;
-        ">Top {top_n_suggestions} candidates</div>""",
-        unsafe_allow_html=True,
-    )
 
     st.markdown("---")
     show_debug = st.checkbox("Show extracted-text debug info", value=False)
