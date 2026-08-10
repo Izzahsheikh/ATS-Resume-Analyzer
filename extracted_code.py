@@ -1,29 +1,18 @@
-"""
-AI ATS Resume Analyzer — Streamlit UI (Hybrid Scoring Version)
----------------------------------------------------------------
-- Gemini extracts required skills from JD (domain-aware, not generic keywords)
-- Math computes all scores deterministically
-- Gemini also provides matched/missing skills and suggestions
-- Scores are stable and consistent every run
-
-Run with:
-    streamlit run extracted_code.py
-"""
-
 import os
 import re
 import json
-import tempfile
 import string
+import hashlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import io
 
 import streamlit as st
 from dotenv import load_dotenv
-from pypdf import PdfReader
+import fitz  # PyMuPDF
+import docx  # python-docx
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 
@@ -44,22 +33,40 @@ if not os.environ.get("GOOGLE_API_KEY"):
 # --------------------------------------------------------------------------
 # HELPERS
 # --------------------------------------------------------------------------
+def normalize_extracted_text(text: str) -> str:
+    text = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text)
+    text = re.sub(r'(?<=[A-Za-z])(?=\d)', ' ', text)
+    text = re.sub(r'(?<=\d)(?=[A-Za-z])', ' ', text)
+    text = re.sub(r'(?<=[,/])(?=\S)', ' ', text)
+    text = re.sub(r'[ \t]+', ' ', text)
+    return text
+
+
 def extract_text_from_uploaded(uploaded_file) -> str:
     suffix = os.path.splitext(uploaded_file.name)[1].lower()
     if suffix == ".pdf":
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            tmp.write(uploaded_file.read())
-            tmp_path = tmp.name
-        reader = PdfReader(tmp_path)
+        file_bytes = uploaded_file.read()
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
         text = ""
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
-        os.remove(tmp_path)
-        return text
+        for page in doc:
+            text += page.get_text() + "\n"
+        doc.close()
+        return normalize_extracted_text(text)
+    elif suffix == ".docx":
+        file_bytes = uploaded_file.read()
+        document = docx.Document(io.BytesIO(file_bytes))
+        paragraphs = [p.text for p in document.paragraphs if p.text.strip()]
+        # Also extract text from tables
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    if cell.text.strip():
+                        paragraphs.append(cell.text)
+        text = "\n".join(paragraphs)
+        return normalize_extracted_text(text)
     else:
-        return uploaded_file.read().decode("utf-8", errors="ignore")
+        raw = uploaded_file.read().decode("utf-8", errors="ignore")
+        return normalize_extracted_text(raw)
 
 
 def parse_json_response(text):
@@ -79,13 +86,8 @@ def get_llm():
     return ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
 
 
-@st.cache_resource(show_spinner=False)
-def get_embeddings():
-    return HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-
 # --------------------------------------------------------------------------
-# STEP 1: Extract required skills from JD using Gemini (done once per JD)
+# STEP 1: Extract required skills from JD — cached by content hash
 # --------------------------------------------------------------------------
 JD_SKILLS_PROMPT = PromptTemplate(
     input_variables=["job_description"],
@@ -109,7 +111,7 @@ Do NOT include soft skills like "communication" or "teamwork".
 
 @st.cache_data(show_spinner=False)
 def extract_jd_skills(jd_text: str) -> list:
-    """Extract required skills from JD using Gemini. Cached so runs only once."""
+    """Cached by JD content — only runs once per unique JD."""
     prompt = JD_SKILLS_PROMPT.format(job_description=jd_text)
     response = get_llm().invoke(prompt)
     data = parse_json_response(response.content)
@@ -117,19 +119,51 @@ def extract_jd_skills(jd_text: str) -> list:
 
 
 # --------------------------------------------------------------------------
-# STEP 2: Deterministic scoring
+# STEP 2: Precompute JD TF-IDF vector ONCE (cached by content hash)
+# --------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def build_jd_tfidf_cache(jd_text: str):
+    """
+    Returns a cleaned JD string for use in per-resume TF-IDF comparisons.
+    We cache the cleaned version; the vectorizer is fit fresh per batch
+    (unavoidable since sklearn requires the full corpus at fit time).
+    """
+    def clean(t):
+        t = t.lower()
+        return t.translate(str.maketrans("", "", string.punctuation))
+    return clean(jd_text)
+
+
+def compute_tfidf_batch(jd_clean: str, resume_texts: list[str]) -> list[int]:
+    """
+    Fit ONE TF-IDF vectorizer on JD + all resumes, then score each resume.
+    Much faster than re-fitting per resume.
+    """
+    def clean(t):
+        t = t.lower()
+        return t.translate(str.maketrans("", "", string.punctuation))
+
+    cleaned_resumes = [clean(r) for r in resume_texts]
+    corpus = [jd_clean] + cleaned_resumes
+
+    vectorizer = TfidfVectorizer(stop_words="english")
+    tfidf = vectorizer.fit_transform(corpus)
+
+    jd_vec = tfidf[0:1]
+    scores = []
+    for i in range(1, len(corpus)):
+        sim = cosine_similarity(jd_vec, tfidf[i : i + 1])[0][0]
+        scores.append(round(sim * 100))
+    return scores
+
+
+# --------------------------------------------------------------------------
+# STEP 3: Deterministic scoring (no LLM)
 # --------------------------------------------------------------------------
 def compute_skill_match(resume_text: str, required_skills: list) -> tuple[int, list, list]:
-    """
-    Check which required skills appear in the resume.
-    Returns (score, matched_list, missing_list).
-    Deterministic — same input always same output.
-    """
     resume_lower = resume_text.lower()
-    matched = []
-    missing = []
+    matched, missing = [], []
     for skill in required_skills:
-        # Match whole word or phrase
         pattern = r'\b' + re.escape(skill) + r'\b'
         if re.search(pattern, resume_lower):
             matched.append(skill)
@@ -137,17 +171,6 @@ def compute_skill_match(resume_text: str, required_skills: list) -> tuple[int, l
             missing.append(skill)
     score = round(len(matched) / len(required_skills) * 100) if required_skills else 0
     return score, matched, missing
-
-
-def compute_tfidf_similarity(resume_text: str, jd_text: str) -> int:
-    """Cosine similarity between resume and JD. Always same result."""
-    def clean(t):
-        t = t.lower()
-        return t.translate(str.maketrans("", "", string.punctuation))
-    vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf = vectorizer.fit_transform([clean(jd_text), clean(resume_text)])
-    score = cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0]
-    return round(score * 100)
 
 
 def score_education(resume_text: str) -> int:
@@ -206,8 +229,45 @@ def score_formatting(resume_text: str) -> int:
     return min(score, 100)
 
 
+def score_resume_deterministic(
+    resume_text: str,
+    jd_text: str,
+    required_skills: list,
+    tfidf_score: int,
+) -> dict:
+    """All scoring done in Python — no LLM. Safe to run in parallel threads."""
+    skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
+    combined_skill = round(skill_score * 0.7 + tfidf_score * 0.3)
+
+    experience_score = score_experience(resume_text, jd_text)
+    education_score = score_education(resume_text)
+    projects_score = score_projects(resume_text)
+    formatting_score = score_formatting(resume_text)
+
+    ats_score = round(
+        combined_skill   * 0.40 +
+        experience_score * 0.25 +
+        education_score  * 0.15 +
+        projects_score   * 0.12 +
+        formatting_score * 0.08
+    )
+
+    return {
+        "ats_score": ats_score,
+        "final_score": ats_score,
+        "skill_match": combined_skill,
+        "experience_score": experience_score,
+        "education_score": education_score,
+        "projects_score": projects_score,
+        "formatting_score": formatting_score,
+        "matched_skills": [s.title() for s in matched],
+        "missing_skills": [s.title() for s in missing],
+        "suggestions": [],  # filled in Stage 2 for top-N only
+    }
+
+
 # --------------------------------------------------------------------------
-# STEP 3: Gemini suggestions (qualitative only, not scoring)
+# STEP 4: LLM suggestions — Stage 2, top-N only
 # --------------------------------------------------------------------------
 SUGGESTIONS_PROMPT = PromptTemplate(
     input_variables=["job_description", "resume_text", "missing_skills"],
@@ -237,7 +297,7 @@ Respond with ONLY a valid JSON object (no markdown):
 def get_suggestions(resume_text: str, jd_text: str, missing_skills: list) -> list:
     prompt = SUGGESTIONS_PROMPT.format(
         job_description=jd_text,
-        resume_text=resume_text[:3000],  # limit tokens
+        resume_text=resume_text[:3000],
         missing_skills=", ".join(missing_skills) if missing_skills else "None",
     )
     try:
@@ -248,45 +308,28 @@ def get_suggestions(resume_text: str, jd_text: str, missing_skills: list) -> lis
         return ["Could not generate suggestions. Check your API key."]
 
 
-# --------------------------------------------------------------------------
-# MAIN ANALYSIS
-# --------------------------------------------------------------------------
-def analyze_resume(resume_text: str, jd_text: str, required_skills: list) -> dict:
-    # Skill match using JD-extracted skills (domain-aware)
-    skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
+def enrich_with_suggestions_parallel(
+    results: list[dict],
+    resume_texts: dict[str, str],
+    jd_text: str,
+    top_n: int,
+) -> None:
+    """
+    Fetches AI suggestions for top-N candidates in parallel (in-place mutation).
+    Uses ThreadPoolExecutor — safe since each call is independent I/O.
+    """
+    top_results = results[:top_n]
 
-    # Boost skill score with TF-IDF similarity
-    tfidf_score = compute_tfidf_similarity(resume_text, jd_text)
-    combined_skill = round(skill_score * 0.7 + tfidf_score * 0.3)
+    def fetch(r):
+        name = r["candidate_name"]
+        missing = [s.lower() for s in r.get("missing_skills", [])]
+        r["suggestions"] = get_suggestions(resume_texts[name], jd_text, missing)
+        return name
 
-    experience_score = score_experience(resume_text, jd_text)
-    education_score = score_education(resume_text)
-    projects_score = score_projects(resume_text)
-    formatting_score = score_formatting(resume_text)
-
-    ats_score = round(
-        combined_skill   * 0.40 +
-        experience_score * 0.25 +
-        education_score  * 0.15 +
-        projects_score   * 0.12 +
-        formatting_score * 0.08
-    )
-
-    # Gemini only for suggestions
-    suggestions = get_suggestions(resume_text, jd_text, missing)
-
-    return {
-        "ats_score": ats_score,
-        "final_score": ats_score,
-        "skill_match": combined_skill,
-        "experience_score": experience_score,
-        "education_score": education_score,
-        "projects_score": projects_score,
-        "formatting_score": formatting_score,
-        "matched_skills": [s.title() for s in matched],
-        "missing_skills": [s.title() for s in missing],
-        "suggestions": suggestions,
-    }
+    with ThreadPoolExecutor(max_workers=min(top_n, 5)) as executor:
+        futures = {executor.submit(fetch, r): r["candidate_name"] for r in top_results}
+        for future in as_completed(futures):
+            _ = future.result()  # propagate exceptions if any
 
 
 # --------------------------------------------------------------------------
@@ -297,6 +340,12 @@ with st.sidebar:
     shortlist_threshold = st.slider(
         "Shortlist threshold (ATS score %)", min_value=0, max_value=100, value=70
     )
+    top_n_suggestions = st.slider(
+        "Generate AI suggestions for top N candidates",
+        min_value=1, max_value=20, value=5,
+        help="LLM is only called for these candidates after ranking. Keeps it fast.",
+    )
+    show_debug = st.checkbox("Show extracted-text debug info", value=False)
 
 # --------------------------------------------------------------------------
 # FILE UPLOADS
@@ -311,7 +360,7 @@ analyze_clicked = st.button("Analyze & Rank Candidates", type="primary", use_con
 
 
 # --------------------------------------------------------------------------
-# ANALYSIS
+# MAIN PIPELINE
 # --------------------------------------------------------------------------
 if analyze_clicked:
     if not jd_file:
@@ -321,49 +370,110 @@ if analyze_clicked:
         st.error("Please upload at least one resume.")
         st.stop()
 
+    # ── JD processing (cached after first run) ──────────────────────────────
     with st.spinner("Reading job description..."):
         jd_text = extract_text_from_uploaded(jd_file)
     if not jd_text.strip():
         st.error("Couldn't extract text from the job description.")
         st.stop()
 
-    # Extract required skills from JD once (cached)
     with st.spinner("Extracting required skills from job description..."):
         required_skills = extract_jd_skills(jd_text)
     st.info(f"📋 **Required skills identified:** {', '.join(s.title() for s in required_skills)}")
 
-    results = []
-    progress = st.progress(0.0, text="Starting analysis...")
+    jd_clean = build_jd_tfidf_cache(jd_text)
 
-    for i, resume_file in enumerate(resume_files):
-        progress.progress(i / len(resume_files), text=f"Analyzing {resume_file.name}...")
-        try:
-            resume_text = extract_text_from_uploaded(resume_file)
-            if not resume_text.strip():
-                st.warning(f"Skipping {resume_file.name} — no extractable text.")
-                continue
-            analysis = analyze_resume(resume_text, jd_text, required_skills)
-            analysis["candidate_name"] = resume_file.name
-            results.append(analysis)
-        except Exception as e:
-            st.warning(f"Failed to analyze {resume_file.name}: {e}")
+    # ── PHASE 1: Parallel PDF extraction ────────────────────────────────────
+    progress = st.progress(0.0, text="Extracting resume text in parallel...")
 
-    progress.progress(1.0, text="Done")
-    progress.empty()
+    resume_texts: dict[str, str] = {}
+    failed: list[str] = []
 
-    if not results:
-        st.error("No resumes could be analyzed.")
+    def extract_one(rf):
+        text = extract_text_from_uploaded(rf)
+        return rf.name, text
+
+    with ThreadPoolExecutor(max_workers=min(len(resume_files), 8)) as executor:
+        futures = {executor.submit(extract_one, rf): rf.name for rf in resume_files}
+        done = 0
+        for future in as_completed(futures):
+            name = futures[future]
+            try:
+                fname, text = future.result()
+                if text.strip():
+                    resume_texts[fname] = text
+                else:
+                    st.warning(f"Skipping {fname} — no extractable text.")
+                    failed.append(fname)
+            except Exception as e:
+                st.warning(f"Failed to read {name}: {e}")
+                failed.append(name)
+            done += 1
+            progress.progress(done / len(resume_files) * 0.3, text=f"Extracted {done}/{len(resume_files)} resumes...")
+
+    if not resume_texts:
+        st.error("No resumes could be read.")
         st.stop()
 
+    # ── PHASE 2: Batch TF-IDF (one vectorizer for all resumes) ──────────────
+    progress.progress(0.35, text="Computing TF-IDF similarity (batch)...")
+    names_ordered = list(resume_texts.keys())
+    texts_ordered = [resume_texts[n] for n in names_ordered]
+    tfidf_scores = compute_tfidf_batch(jd_clean, texts_ordered)
+    tfidf_map = dict(zip(names_ordered, tfidf_scores))
+
+    # ── PHASE 3: Parallel deterministic scoring ──────────────────────────────
+    progress.progress(0.4, text="Scoring resumes in parallel...")
+
+    results: list[dict] = []
+
+    def score_one(name):
+        text = resume_texts[name]
+        result = score_resume_deterministic(text, jd_text, required_skills, tfidf_map[name])
+        result["candidate_name"] = name
+        return result
+
+    with ThreadPoolExecutor(max_workers=min(len(resume_texts), 8)) as executor:
+        futures = {executor.submit(score_one, n): n for n in names_ordered}
+        done = 0
+        for future in as_completed(futures):
+            try:
+                results.append(future.result())
+            except Exception as e:
+                name = futures[future]
+                st.warning(f"Scoring failed for {name}: {e}")
+            done += 1
+            progress.progress(0.4 + done / len(resume_texts) * 0.3, text=f"Scored {done}/{len(resume_texts)} resumes...")
+
+    if not results:
+        st.error("No resumes could be scored.")
+        st.stop()
+
+    # ── PHASE 4: Rank ────────────────────────────────────────────────────────
     results.sort(key=lambda r: r["final_score"], reverse=True)
 
-    # ---------------- RANKING ----------------
+    # ── PHASE 5: LLM suggestions for top-N only (parallel) ──────────────────
+    actual_top_n = min(top_n_suggestions, len(results))
+    progress.progress(0.70, text=f"Generating AI suggestions for top {actual_top_n} candidates...")
+
+    if show_debug:
+        for name, text in resume_texts.items():
+            with st.expander(f"🔧 Debug: extracted text — {name}", expanded=False):
+                st.text(text[:3000])
+
+    enrich_with_suggestions_parallel(results, resume_texts, jd_text, actual_top_n)
+
+    progress.progress(1.0, text="Done!")
+    progress.empty()
+
+    # ── RANKING DISPLAY ──────────────────────────────────────────────────────
     st.divider()
     st.subheader("🏆 Candidate Ranking")
 
     for rank, r in enumerate(results, start=1):
         shortlisted = r["final_score"] >= shortlist_threshold
         badge = "✅ Shortlist" if shortlisted else "❌ Not shortlisted"
+        has_suggestions = bool(r.get("suggestions"))
 
         with st.container(border=True):
             top = st.columns([0.5, 3, 1, 1.5])
@@ -391,15 +501,19 @@ if analyze_clicked:
                         st.markdown(f"- {skill}")
 
                 st.markdown("**💡 Suggestions**")
-                for s in r.get("suggestions", []):
-                    st.markdown(f"- {s}")
+                if has_suggestions:
+                    for s in r["suggestions"]:
+                        st.markdown(f"- {s}")
+                else:
+                    st.caption(f"_AI suggestions generated for top {actual_top_n} candidates only._")
 
-    # ---------------- SUMMARY ----------------
+    # ── SUMMARY ─────────────────────────────────────────────────────────────
     st.divider()
-    shortlisted_names = [
-        r["candidate_name"] for r in results if r["final_score"] >= shortlist_threshold
-    ]
+    shortlisted_names = [r["candidate_name"] for r in results if r["final_score"] >= shortlist_threshold]
     if shortlisted_names:
         st.success(f"✅ Recommended to shortlist: {', '.join(shortlisted_names)}")
     else:
         st.info("No candidates met the shortlist threshold. Try lowering it in the sidebar.")
+
+    total_llm_calls = 1 + actual_top_n  # 1 for JD skills + top-N suggestions
+    st.caption(f"⚡ Total LLM calls this run: **{total_llm_calls}** (1 JD extraction + {actual_top_n} suggestions). All other scoring was deterministic Python.")
