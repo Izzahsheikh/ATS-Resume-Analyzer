@@ -323,57 +323,21 @@ def enrich_with_suggestions_parallel(
 with st.sidebar:
     st.header("Settings")
 
-    # ── Shortlist Threshold ─────────────────────────────────────────────────
-    st.markdown("**Shortlist Threshold**")
-    st.caption("Candidates at or above this ATS score will be shortlisted.")
-
-    if "threshold" not in st.session_state:
-        st.session_state.threshold = 75
-
-    col_minus, col_val, col_plus = st.columns([1, 2, 1])
-    with col_minus:
-        if st.button("−", use_container_width=True, key="dec_threshold"):
-            if st.session_state.threshold > 0:
-                st.session_state.threshold -= 1
-    with col_val:
-        st.markdown(
-            f"<div style='text-align:center; font-size:1.6rem; font-weight:700; padding:4px 0;'>"
-            f"{st.session_state.threshold}%</div>",
-            unsafe_allow_html=True,
-        )
-    with col_plus:
-        if st.button("+", use_container_width=True, key="inc_threshold"):
-            if st.session_state.threshold < 100:
-                st.session_state.threshold += 1
-
-    shortlist_threshold = st.session_state.threshold
+    shortlist_threshold = st.number_input(
+        "Shortlist Threshold (%)",
+        min_value=0, max_value=100,
+        value=75, step=1,
+        help="Candidates at or above this ATS score will be shortlisted.",
+    )
 
     st.markdown("---")
 
-    # ── Top-N suggestions ───────────────────────────────────────────────────
-    st.markdown("**AI Suggestions — Top Candidates**")
-    st.caption("AI suggestions generated only for top N ranked candidates.")
-
-    if "top_n" not in st.session_state:
-        st.session_state.top_n = 5
-
-    col_n_minus, col_n_val, col_n_plus = st.columns([1, 2, 1])
-    with col_n_minus:
-        if st.button("−", use_container_width=True, key="dec_topn"):
-            if st.session_state.top_n > 1:
-                st.session_state.top_n -= 1
-    with col_n_val:
-        st.markdown(
-            f"<div style='text-align:center; font-size:1.6rem; font-weight:700; padding:4px 0;'>"
-            f"{st.session_state.top_n}</div>",
-            unsafe_allow_html=True,
-        )
-    with col_n_plus:
-        if st.button("+", use_container_width=True, key="inc_topn"):
-            if st.session_state.top_n < 20:
-                st.session_state.top_n += 1
-
-    top_n_suggestions = st.session_state.top_n
+    top_n_suggestions = st.number_input(
+        "AI Suggestions — Top N Candidates",
+        min_value=1, max_value=20,
+        value=5, step=1,
+        help="AI suggestions generated only for top N ranked candidates.",
+    )
 
     st.markdown("---")
     show_debug = st.checkbox("Show extracted-text debug info", value=False)
