@@ -338,14 +338,14 @@ with st.sidebar:
     st.markdown("---")
 
     top_n_suggestions = st.number_input(
-        "AI Suggestions — Top N Candidates",
+        "Top  Candidates",
         min_value=1, max_value=10,
         value=5, step=1,
         help="AI suggestions generated only for top N ranked candidates.",
     )
     st.markdown(
         "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
-        "Number of top-ranked candidates who will receive detailed AI-powered improvement suggestions.</p>",
+        "Number of top-ranked candidates who will receive detailed description</p>",
         unsafe_allow_html=True,
     )
 
