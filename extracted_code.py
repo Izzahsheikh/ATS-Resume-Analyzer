@@ -329,17 +329,25 @@ with st.sidebar:
         value=75, step=1,
         help="Candidates at or above this ATS score will be shortlisted.",
     )
-    st.caption("Scale: 0–100% · 75% recommended · Higher = stricter shortlisting")
+    st.markdown(
+        "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
+        "0–100% &nbsp;·&nbsp; 75% recommended &nbsp;·&nbsp; Higher = stricter</p>",
+        unsafe_allow_html=True,
+    )
 
     st.markdown("---")
 
     top_n_suggestions = st.number_input(
         "AI Suggestions — Top N Candidates",
-        min_value=1, max_value=20,
+        min_value=1, max_value=10,
         value=5, step=1,
         help="AI suggestions generated only for top N ranked candidates.",
     )
-    st.caption("Range: 1–20 · 5–10 recommended · More = slower but richer insights")
+    st.markdown(
+        "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
+        "1–10 candidates &nbsp;·&nbsp; 5 recommended &nbsp;·&nbsp; More = slower</p>",
+        unsafe_allow_html=True,
+    )
 
     st.markdown("---")
     show_debug = st.checkbox("Show extracted-text debug info", value=False)
