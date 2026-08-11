@@ -331,7 +331,7 @@ with st.sidebar:
     )
     st.markdown(
         "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
-        "0–100% &nbsp;·&nbsp; 75% recommended &nbsp;·&nbsp; Higher = stricter</p>",
+        "Sets the minimum ATS score a candidate must achieve to be shortlisted for review.</p>",
         unsafe_allow_html=True,
     )
 
@@ -345,7 +345,7 @@ with st.sidebar:
     )
     st.markdown(
         "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
-        "1–10 candidates &nbsp;·&nbsp; 5 recommended &nbsp;·&nbsp; More = slower</p>",
+        "Number of top-ranked candidates who will receive detailed AI-powered improvement suggestions.</p>",
         unsafe_allow_html=True,
     )
 
