@@ -349,8 +349,6 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    st.markdown("---")
-    show_debug = st.checkbox("Show extracted-text debug info", value=False)
 
 
 # --------------------------------------------------------------------------
@@ -462,10 +460,6 @@ if analyze_clicked:
     actual_top_n = min(top_n_suggestions, len(results))
     progress.progress(0.70, text=f"Generating AI suggestions for top {actual_top_n} candidates...")
 
-    if show_debug:
-        for name, text in resume_texts.items():
-            with st.expander(f"🔧 Debug: extracted text — {name}", expanded=False):
-                st.text(text[:3000])
 
     enrich_with_suggestions_parallel(results, resume_texts, jd_text, actual_top_n)
 
