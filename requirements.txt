@@ -1,10 +1,7 @@
-langchain
-langchain-text-splitters
+streamlit
+python-dotenv
+PyMuPDF
+python-docx
+scikit-learn
 langchain-google-genai
-langchain-huggingface
-langchain-chroma
-langchain-community
-chromadb
-pypdf
-sentence-transformers
-google-generativeai
+langchain-core
