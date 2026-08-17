@@ -11,9 +11,9 @@ import streamlit as st
 from dotenv import load_dotenv
 import fitz  # PyMuPDF
 import docx  # python-docx
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 from langchain_google_genai import ChatGoogleGenerativeAI
+from sentence_transformers import SentenceTransformer
 from langchain_core.prompts import PromptTemplate
 
 load_dotenv()
@@ -115,51 +115,147 @@ def extract_jd_skills(jd_text: str) -> list:
     response = get_llm().invoke(prompt)
     data = parse_json_response(response.content)
     return [s.lower() for s in data.get("required_skills", [])]
-
+@st.cache_resource
+def get_embedding_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
 
 # --------------------------------------------------------------------------
-# STEP 2: Precompute JD TF-IDF vector ONCE (cached by content hash)
+# STEP 2: Semantic Embeddings
 # --------------------------------------------------------------------------
+
 @st.cache_data(show_spinner=False)
-def build_jd_tfidf_cache(jd_text: str):
-    def clean(t):
-        t = t.lower()
-        return t.translate(str.maketrans("", "", string.punctuation))
-    return clean(jd_text)
+def generate_embeddings(texts: tuple) -> np.ndarray:
+    """
+    Generate local embeddings for multiple texts.
+
+    Embeddings are generated locally.
+    No Gemini embedding API call is made.
+    """
+
+    model = get_embedding_model()
+
+    embeddings = model.encode(
+        list(texts),
+        batch_size=32,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False
+    )
+
+    return embeddings
 
 
-def compute_tfidf_batch(jd_clean: str, resume_texts: list) -> list:
-    def clean(t):
-        t = t.lower()
-        return t.translate(str.maketrans("", "", string.punctuation))
+def cosine_similarity_score(a, b):
+    """
+    Calculate cosine similarity between two normalized vectors.
+    """
 
-    cleaned_resumes = [clean(r) for r in resume_texts]
-    corpus = [jd_clean] + cleaned_resumes
+    return float(np.dot(a, b))
 
-    vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf = vectorizer.fit_transform(corpus)
 
-    jd_vec = tfidf[0:1]
-    scores = []
-    for i in range(1, len(corpus)):
-        sim = cosine_similarity(jd_vec, tfidf[i : i + 1])[0][0]
-        scores.append(round(sim * 100))
-    return scores
+def compute_semantic_similarity(
+    jd_embedding: np.ndarray,
+    resume_embeddings: np.ndarray
+) -> list:
+    """
+    Calculate JD ↔ Resume semantic similarity locally.
+    """
+
+    similarities = np.dot(
+        resume_embeddings,
+        jd_embedding
+    )
+
+    return [
+        round(float(score) * 100)
+        for score in similarities
+    ]
 
 
 # --------------------------------------------------------------------------
 # STEP 3: Deterministic scoring (no LLM)
 # --------------------------------------------------------------------------
-def compute_skill_match(resume_text: str, required_skills: list) -> tuple:
-    resume_lower = resume_text.lower()
-    matched, missing = [], []
-    for skill in required_skills:
-        pattern = r'\b' + re.escape(skill) + r'\b'
-        if re.search(pattern, resume_lower):
+
+def compute_skill_match(
+    resume_text: str,
+    required_skills: list
+) -> tuple:
+
+    if not required_skills:
+        return 0, [], []
+
+    # Resume ko lines mein divide karo
+    chunks = [
+        line.strip()
+        for line in resume_text.splitlines()
+        if len(line.strip()) >= 15
+    ]
+
+    if not chunks:
+        return 0, [], []
+
+    # Local embedding model
+    model = get_embedding_model()
+
+    # Required skills embeddings
+    skill_embeddings = model.encode(
+        required_skills,
+        batch_size=32,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False
+    )
+
+    # Resume chunks embeddings
+    chunk_embeddings = model.encode(
+        chunks,
+        batch_size=32,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False
+    )
+
+    # Each skill vs every resume chunk
+    similarities = np.dot(
+        skill_embeddings,
+        chunk_embeddings.T
+    )
+
+    matched = []
+    missing = []
+
+    MATCH_THRESHOLD = 0.50
+
+    for skill, skill_similarities in zip(
+        required_skills,
+        similarities
+    ):
+
+        best_similarity = float(
+            np.max(skill_similarities)
+        )
+
+        print(
+            f"{skill}: {best_similarity:.4f}"
+        )
+
+        if best_similarity >= MATCH_THRESHOLD:
             matched.append(skill)
         else:
             missing.append(skill)
-    score = round(len(matched) / len(required_skills) * 100) if required_skills else 0
+
+    score = round(
+        len(matched) /
+        len(required_skills) *
+        100
+    )
+
+    print("\n--- SKILL MATCH DEBUG ---")
+    print("Required skills:", required_skills)
+    print("Matched:", matched)
+    print("Missing:", missing)
+    print("Skill Score:", score)
+
     return score, matched, missing
 
 
@@ -223,15 +319,37 @@ def score_resume_deterministic(
     resume_text: str,
     jd_text: str,
     required_skills: list,
-    tfidf_score: int,
+    semantic_score: int,
+    resume_embedding: np.ndarray,
+    skill_embeddings: np.ndarray,
 ) -> dict:
-    skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
-    combined_skill = round(skill_score * 0.7 + tfidf_score * 0.3)
 
-    experience_score = score_experience(resume_text, jd_text)
-    education_score = score_education(resume_text)
-    projects_score = score_projects(resume_text)
-    formatting_score = score_formatting(resume_text)
+    skill_score, matched, missing = compute_skill_match(
+        resume_text,
+        required_skills
+    )
+
+    combined_skill = round(
+        skill_score * 0.7 +
+        semantic_score * 0.3
+    )
+
+    experience_score = score_experience(
+        resume_text,
+        jd_text
+    )
+
+    education_score = score_education(
+        resume_text
+    )
+
+    projects_score = score_projects(
+        resume_text
+    )
+
+    formatting_score = score_formatting(
+        resume_text
+    )
 
     ats_score = round(
         combined_skill   * 0.40 +
@@ -385,7 +503,7 @@ if analyze_clicked:
         required_skills = extract_jd_skills(jd_text)
     st.info(f"📋 **Required skills identified:** {', '.join(s.title() for s in required_skills)}")
 
-    jd_clean = build_jd_tfidf_cache(jd_text)
+    
 
     # ── PHASE 1: Parallel PDF extraction ────────────────────────────────────
     progress = st.progress(0.0, text="Extracting resume text in parallel...")
@@ -419,51 +537,136 @@ if analyze_clicked:
         st.error("No resumes could be read.")
         st.stop()
 
-    # ── PHASE 2: Batch TF-IDF ───────────────────────────────────────────────
-    progress.progress(0.35, text="Computing TF-IDF similarity (batch)...")
-    names_ordered = list(resume_texts.keys())
-    texts_ordered = [resume_texts[n] for n in names_ordered]
-    tfidf_scores = compute_tfidf_batch(jd_clean, texts_ordered)
-    tfidf_map = dict(zip(names_ordered, tfidf_scores))
+      # ── PHASE 2: Local Semantic Embeddings ────────────────────────────────
+    progress.progress(
+        0.35,
+        text="Generating local semantic embeddings..."
+    )
 
+    names_ordered = list(resume_texts.keys())
+
+    texts_ordered = [
+        resume_texts[name]
+        for name in names_ordered
+    ]
+
+    jd_embedding = generate_embeddings(
+        (jd_text,)
+    )[0]
+
+    resume_embeddings = generate_embeddings(
+        tuple(texts_ordered)
+    )
+
+    skill_embeddings = generate_embeddings(
+        tuple(required_skills)
+    )
+
+    semantic_scores = compute_semantic_similarity(
+        jd_embedding,
+        resume_embeddings
+    )
+
+    semantic_map = dict(
+        zip(
+            names_ordered,
+            semantic_scores
+        )
+    )
+
+    resume_embedding_map = dict(
+        zip(
+            names_ordered,
+            resume_embeddings
+        )
+    )
     # ── PHASE 3: Parallel deterministic scoring ──────────────────────────────
-    progress.progress(0.4, text="Scoring resumes in parallel...")
+    progress.progress(
+        0.4,
+        text="Scoring resumes in parallel..."
+    )
 
     results: list = []
 
     def score_one(name):
         text = resume_texts[name]
-        result = score_resume_deterministic(text, jd_text, required_skills, tfidf_map[name])
+
+        result = score_resume_deterministic(
+            resume_text=text,
+            jd_text=jd_text,
+            required_skills=required_skills,
+            semantic_score=semantic_map[name],
+            resume_embedding=resume_embedding_map[name],
+            skill_embeddings=skill_embeddings,
+        )
+
         result["candidate_name"] = name
+
         return result
 
-    with ThreadPoolExecutor(max_workers=min(len(resume_texts), 8)) as executor:
-        futures = {executor.submit(score_one, n): n for n in names_ordered}
+    with ThreadPoolExecutor(
+        max_workers=min(len(resume_texts), 8)
+    ) as executor:
+
+        futures = {
+            executor.submit(score_one, n): n
+            for n in names_ordered
+        }
+
         done = 0
+
         for future in as_completed(futures):
             try:
                 results.append(future.result())
+
             except Exception as e:
                 name = futures[future]
-                st.warning(f"Scoring failed for {name}: {e}")
+                st.warning(
+                    f"Scoring failed for {name}: {e}"
+                )
+
             done += 1
-            progress.progress(0.4 + done / len(resume_texts) * 0.3, text=f"Scored {done}/{len(resume_texts)} resumes...")
+
+            progress.progress(
+                0.4 + done / len(resume_texts) * 0.3,
+                text=f"Scored {done}/{len(resume_texts)} resumes..."
+            )
 
     if not results:
         st.error("No resumes could be scored.")
         st.stop()
 
+
     # ── PHASE 4: Rank ────────────────────────────────────────────────────────
-    results.sort(key=lambda r: r["final_score"], reverse=True)
+    results.sort(
+        key=lambda r: r["final_score"],
+        reverse=True
+    )
+
 
     # ── PHASE 5: LLM suggestions for top-N only ──────────────────────────────
-    actual_top_n = min(top_n_suggestions, len(results))
-    progress.progress(0.70, text=f"Generating AI suggestions for top {actual_top_n} candidates...")
+    actual_top_n = min(
+        top_n_suggestions,
+        len(results)
+    )
 
+    progress.progress(
+        0.70,
+        text=f"Generating AI suggestions for top {actual_top_n} candidates..."
+    )
 
-    enrich_with_suggestions_parallel(results, resume_texts, jd_text, actual_top_n)
+    enrich_with_suggestions_parallel(
+        results,
+        resume_texts,
+        jd_text,
+        actual_top_n
+    )
 
-    progress.progress(1.0, text="Done!")
+    progress.progress(
+        1.0,
+        text="Done!"
+    )
+
     progress.empty()
 
     # ── RANKING DISPLAY ──────────────────────────────────────────────────────
@@ -484,36 +687,76 @@ if analyze_clicked:
 
             with st.expander("Details"):
                 c1, c2, c3, c4, c5 = st.columns(5)
-                c1.metric("Skill Match", f"{r.get('skill_match', 0)}%")
-                c2.metric("Experience", f"{r.get('experience_score', 0)}%")
-                c3.metric("Education", f"{r.get('education_score', 0)}%")
-                c4.metric("Projects", f"{r.get('projects_score', 0)}%")
-                c5.metric("Formatting", f"{r.get('formatting_score', 0)}%")
+
+                c1.metric(
+                    "Skill Match",
+                    f"{r.get('skill_match', 0)}%"
+                )
+                c2.metric(
+                    "Experience",
+                    f"{r.get('experience_score', 0)}%"
+                )
+                c3.metric(
+                    "Education",
+                    f"{r.get('education_score', 0)}%"
+                )
+                c4.metric(
+                    "Projects",
+                    f"{r.get('projects_score', 0)}%"
+                )
+                c5.metric(
+                    "Formatting",
+                    f"{r.get('formatting_score', 0)}%"
+                )
 
                 d1, d2 = st.columns(2)
+
                 with d1:
                     st.markdown("**✅ Matched Skills**")
                     for skill in r.get("matched_skills", []):
                         st.markdown(f"- {skill}")
+
                 with d2:
                     st.markdown("**❌ Missing Skills**")
                     for skill in r.get("missing_skills", []):
                         st.markdown(f"- {skill}")
 
                 st.markdown("**💡 Suggestions**")
+
                 if has_suggestions:
                     for s in r["suggestions"]:
                         st.markdown(f"- {s}")
                 else:
-                    st.caption(f"_AI suggestions generated for top {actual_top_n} candidates only._")
+                    st.caption(
+                        f"_AI suggestions generated for top "
+                        f"{actual_top_n} candidates only._"
+                    )
+
 
     # ── SUMMARY ─────────────────────────────────────────────────────────────
     st.divider()
-    shortlisted_names = [r["candidate_name"] for r in results if r["final_score"] >= shortlist_threshold]
+
+    shortlisted_names = [
+        r["candidate_name"]
+        for r in results
+        if r["final_score"] >= shortlist_threshold
+    ]
+
     if shortlisted_names:
-        st.success(f"✅ Recommended to shortlist: {', '.join(shortlisted_names)}")
+        st.success(
+            f"✅ Recommended to shortlist: "
+            f"{', '.join(shortlisted_names)}"
+        )
     else:
-        st.info("No candidates met the shortlist threshold. Try lowering it in the sidebar.")
+        st.info(
+            "No candidates met the shortlist threshold. "
+            "Try lowering it in the sidebar."
+        )
 
     total_llm_calls = 1 + actual_top_n
-    st.caption(f"⚡ Total LLM calls this run: **{total_llm_calls}** (1 JD extraction + {actual_top_n} suggestions). All other scoring was deterministic Python.")
+
+    st.caption(
+        f"⚡ Total Gemini LLM calls this run: **{total_llm_calls}** "
+        f"(1 JD extraction + {actual_top_n} suggestions). "
+        "Semantic embeddings and ATS scoring run locally."
+    )
