@@ -26,7 +26,34 @@ st.set_page_config(
     page_icon="📄",
     layout="wide"
 )
+st.markdown("""
+<style>
+/* Compact number input */
+div[data-testid="stNumberInput"] {
+    width: 130px;
+}
 
+div[data-testid="stNumberInput"] > div {
+    width: 130px;
+}
+
+/* Number */
+div[data-testid="stNumberInput"] input {
+    font-size: 17px;
+    font-weight: 600;
+    padding-left: 10px;
+}
+
+/* +/- buttons */
+div[data-testid="stNumberInput"] button {
+    width: 32px;
+    min-width: 32px;
+    padding: 0;
+}
+
+
+</style>
+""", unsafe_allow_html=True)
 # --------------------------------------------------------------------------
 # HEADER
 # --------------------------------------------------------------------------
@@ -466,7 +493,7 @@ with st.sidebar:
         help="Candidates at or above this ATS score will be shortlisted.",
     )
     st.markdown(
-        "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
+        "<p style='color:white; font-size:18px; margin-top:2px;'>"
         "Sets the minimum ATS score a candidate must achieve to be shortlisted for review.</p>",
         unsafe_allow_html=True,
     )
@@ -480,7 +507,7 @@ with st.sidebar:
         help="AI suggestions generated only for top N ranked candidates.",
     )
     st.markdown(
-        "<p style='color:white; font-size:0.78rem; margin-top:2px;'>"
+        "<p style='color:white; font-size:18px; margin-top:2px;'>"
         "Number of top-ranked candidates who will receive detailed description</p>",
         unsafe_allow_html=True,
     )
