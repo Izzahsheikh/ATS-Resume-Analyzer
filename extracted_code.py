@@ -18,7 +18,7 @@ from langchain_core.prompts import PromptTemplate
 
 load_dotenv()
 
-# --------------------------------------------------------------------------
+## --------------------------------------------------------------------------
 # PAGE CONFIG
 # --------------------------------------------------------------------------
 st.set_page_config(
@@ -26,34 +26,361 @@ st.set_page_config(
     page_icon="📄",
     layout="wide"
 )
+
+
+# --------------------------------------------------------------------------
+# CUSTOM UI THEME
+# --------------------------------------------------------------------------
 st.markdown("""
 <style>
-/* Compact number input */
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+.stApp {
+    background-color: #F7F6F4;
+}
+
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+section[data-testid="stSidebar"] {
+    background-color: #EFEEEC;
+    border-right: 1px solid #DDD9D7;
+}
+
+/* Sidebar headings */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #541F49 !important;
+}
+
+/* Sidebar normal text */
+section[data-testid="stSidebar"] p {
+    color: #292529 !important;
+}
+
+/* Sidebar descriptions / help text */
+section[data-testid="stSidebar"] .stMarkdown p {
+    color: #6F6A6D !important;
+    font-size: 19px !important;
+    line-height: 1.5 !important;
+}
+
+
+/* =========================================================
+   MAIN HEADINGS
+   ========================================================= */
+
+h1 {
+    color: #541F49 !important;
+    font-size: 32px !important;
+    font-weight: 700 !important;
+}
+
+h2 {
+    color: #541F49 !important;
+    font-size: 22px !important;
+    font-weight: 650 !important;
+}
+
+h3 {
+    color: #292529 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   SIDEBAR NUMBER INPUTS
+   ========================================================= */
+
+/* Compact box */
+section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] {
-    width: 130px;
+    width: 140px;
 }
 
+section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] > div {
-    width: 130px;
+    width: 140px;
 }
 
-/* Number */
+/* Input */
+section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] input {
-    font-size: 17px;
-    font-weight: 600;
-    padding-left: 10px;
+    background-color: #FFFFFF !important;
+    color: #292529 !important;
+
+    font-size: 19px !important;
+    font-weight: 600 !important;
 }
 
 /* +/- buttons */
+section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] button {
-    width: 32px;
-    min-width: 32px;
-    padding: 0;
+    width: 32px !important;
+    min-width: 32px !important;
+
+    color: #541F49 !important;
+    background-color: #FFFFFF !important;
+}
+
+/* Focus */
+section[data-testid="stSidebar"]
+div[data-testid="stNumberInput"] input:focus {
+    border-color: #541F49 !important;
+    box-shadow: 0 0 0 1px #541F49 !important;
 }
 
 
+/* =========================================================
+   MAIN BUTTONS
+   ========================================================= */
+
+.stButton > button {
+    background-color: #6B3A5E !important;
+    border: 1px solid #6B3A5E !important;
+    border-radius: 8px !important;
+
+    min-height: 48px !important;
+
+    padding: 0 24px !important;
+
+    color: #FFFFFF !important;
+
+    font-size: 19px !important;
+    font-weight: 600 !important;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease !important;
+}
+
+/* Button text */
+.stButton > button p,
+.stButton > button span {
+    color: #FFFFFF !important;
+}
+
+/* Hover ONLY while cursor is over button */
+.stButton > button:hover {
+    background-color: #541F49 !important;
+    border-color: #541F49 !important;
+    color: #FFFFFF !important;
+}
+
+/* After click / focus -> return to normal color */
+.stButton > button:focus,
+.stButton > button:focus-visible,
+.stButton > button:active {
+    background-color: #6B3A5E !important;
+    border-color: #6B3A5E !important;
+    color: #FFFFFF !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   FILE UPLOADER
+   ========================================================= */
+
+[data-testid="stFileUploader"] {
+    background-color: #F0EFEC !important;
+
+    border: 1px solid #D8D4D1 !important;
+    border-radius: 8px !important;
+
+    padding: 4px !important;
+}
+
+
+/* Upload dropzone */
+[data-testid="stFileUploaderDropzone"] {
+    background-color: #F0EFEC !important;
+
+    border: 1px dashed #C8C3C0 !important;
+    border-radius: 7px !important;
+}
+
+
+/* Upload label */
+[data-testid="stFileUploader"] label {
+    color: #292529 !important;
+    font-size: 19px !important;
+}
+
+
+/* Upload helper text */
+[data-testid="stFileUploader"] small {
+    color: #6F6A6D !important;
+    font-size: 19px !important;
+}
+
+
+/* =========================================================
+   UPLOAD BUTTON
+   ========================================================= */
+
+[data-testid="stFileUploader"] button {
+    background-color: #6B3A5E !important;
+
+    border: 1px solid #6B3A5E !important;
+    border-radius: 7px !important;
+
+    min-height: 42px !important;
+
+    padding: 0 18px !important;
+
+    color: #FFFFFF !important;
+
+    font-size: 19px !important;
+    font-weight: 600 !important;# --------------------------------------------------------------------------
+# PAGE CONTENT
+# --------------------------------------------------------------------------
+
+st.title("📄 AI ATS Resume Analyzer")
+
+st.caption(
+    "Upload multiple resumes and one job description to rank and shortlist candidates."
+)
+}
+
+
+/* Upload button text */
+[data-testid="stFileUploader"] button span,
+[data-testid="stFileUploader"] button p {
+    color: #FFFFFF !important;
+}
+
+
+/* Upload hover */
+[data-testid="stFileUploader"] button:hover {
+    background-color: #541F49 !important;
+    border-color: #541F49 !important;
+}
+
+
+/* Upload button focus/click */
+[data-testid="stFileUploader"] button:focus,
+[data-testid="stFileUploader"] button:focus-visible,
+[data-testid="stFileUploader"] button:active {
+    background-color: #6B3A5E !important;
+    border-color: #6B3A5E !important;
+
+    color: #FFFFFF !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   METRICS
+   ========================================================= */
+
+[data-testid="stMetricValue"] {
+    color: #541F49 !important;
+
+    font-size: 28px !important;
+    font-weight: 700 !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #6F6A6D !important;
+
+    font-size: 19px !important;
+}
+
+
+/* =========================================================
+   EXPANDERS / CARDS
+   ========================================================= */
+
+[data-testid="stExpander"] {
+    background-color: #FFFFFF !important;
+
+    border: 1px solid #DDD9D7 !important;
+    border-radius: 8px !important;
+}
+
+[data-testid="stExpander"] summary {
+    font-size: 19px !important;
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   DIVIDERS
+   ========================================================= */
+
+hr {
+    border-color: #DDD9D7 !important;
+}
+
+
+/* =========================================================
+   CAPTIONS
+   ========================================================= */
+
+[data-testid="stCaptionContainer"] {
+    color: #6F6A6D !important;
+    font-size: 19px !important;
+}
+
+
+/* =========================================================
+   ALERTS
+   ========================================================= */
+
+[data-testid="stAlert"] {
+    border-radius: 8px !important;
+    font-size: 19px !important;
+}
+
+
+/* =========================================================
+   GENERAL MARKDOWN TEXT
+   ========================================================= */
+
+.stMarkdown {
+    font-size: 19px;
+}
+
+
+/* =========================================================
+   SCROLLBAR - SUBTLE
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #F7F6F4;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #C8C3C0;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #A9A2A5;
+}
+
 </style>
 """, unsafe_allow_html=True)
+
 # --------------------------------------------------------------------------
 # HEADER
 # --------------------------------------------------------------------------
