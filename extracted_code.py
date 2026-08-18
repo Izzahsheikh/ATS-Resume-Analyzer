@@ -1,7 +1,6 @@
 import os
 import re
 import json
-import string
 import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -18,7 +17,7 @@ from langchain_core.prompts import PromptTemplate
 
 load_dotenv()
 
-## --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # PAGE CONFIG
 # --------------------------------------------------------------------------
 st.set_page_config(
@@ -57,19 +56,16 @@ section[data-testid="stSidebar"] {
     border-right: 1px solid #DDD9D7;
 }
 
-/* Sidebar headings */
 section[data-testid="stSidebar"] h1,
 section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {
     color: #541F49 !important;
 }
 
-/* Sidebar normal text */
 section[data-testid="stSidebar"] p {
     color: #292529 !important;
 }
 
-/* Sidebar descriptions / help text */
 section[data-testid="stSidebar"] .stMarkdown p {
     color: #6F6A6D !important;
     font-size: 19px !important;
@@ -104,7 +100,6 @@ h3 {
    SIDEBAR NUMBER INPUTS
    ========================================================= */
 
-/* Compact box */
 section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] {
     width: 140px;
@@ -115,27 +110,22 @@ div[data-testid="stNumberInput"] > div {
     width: 140px;
 }
 
-/* Input */
 section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] input {
     background-color: #FFFFFF !important;
     color: #292529 !important;
-
     font-size: 19px !important;
     font-weight: 600 !important;
 }
 
-/* +/- buttons */
 section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] button {
     width: 32px !important;
     min-width: 32px !important;
-
     color: #541F49 !important;
     background-color: #FFFFFF !important;
 }
 
-/* Focus */
 section[data-testid="stSidebar"]
 div[data-testid="stNumberInput"] input:focus {
     border-color: #541F49 !important;
@@ -151,42 +141,31 @@ div[data-testid="stNumberInput"] input:focus {
     background-color: #6B3A5E !important;
     border: 1px solid #6B3A5E !important;
     border-radius: 8px !important;
-
     min-height: 48px !important;
-
     padding: 0 24px !important;
-
     color: #FFFFFF !important;
-
     font-size: 19px !important;
     font-weight: 600 !important;
-
-    transition:
-        background-color 0.15s ease,
-        border-color 0.15s ease !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
 }
 
-/* Button text */
 .stButton > button p,
 .stButton > button span {
     color: #FFFFFF !important;
 }
 
-/* Hover ONLY while cursor is over button */
 .stButton > button:hover {
     background-color: #541F49 !important;
     border-color: #541F49 !important;
     color: #FFFFFF !important;
 }
 
-/* After click / focus -> return to normal color */
 .stButton > button:focus,
 .stButton > button:focus-visible,
 .stButton > button:active {
     background-color: #6B3A5E !important;
     border-color: #6B3A5E !important;
     color: #FFFFFF !important;
-
     box-shadow: none !important;
 }
 
@@ -197,31 +176,22 @@ div[data-testid="stNumberInput"] input:focus {
 
 [data-testid="stFileUploader"] {
     background-color: #F0EFEC !important;
-
     border: 1px solid #D8D4D1 !important;
     border-radius: 8px !important;
-
     padding: 4px !important;
 }
 
-
-/* Upload dropzone */
 [data-testid="stFileUploaderDropzone"] {
     background-color: #F0EFEC !important;
-
     border: 1px dashed #C8C3C0 !important;
     border-radius: 7px !important;
 }
 
-
-/* Upload label */
 [data-testid="stFileUploader"] label {
     color: #292529 !important;
     font-size: 19px !important;
 }
 
-
-/* Upload helper text */
 [data-testid="stFileUploader"] small {
     color: #6F6A6D !important;
     font-size: 19px !important;
@@ -234,52 +204,31 @@ div[data-testid="stNumberInput"] input:focus {
 
 [data-testid="stFileUploader"] button {
     background-color: #6B3A5E !important;
-
     border: 1px solid #6B3A5E !important;
     border-radius: 7px !important;
-
     min-height: 42px !important;
-
     padding: 0 18px !important;
-
     color: #FFFFFF !important;
-
     font-size: 19px !important;
-    font-weight: 600 !important;# --------------------------------------------------------------------------
-# PAGE CONTENT
-# --------------------------------------------------------------------------
-
-st.title("📄 AI ATS Resume Analyzer")
-
-st.caption(
-    "Upload multiple resumes and one job description to rank and shortlist candidates."
-)
+    font-weight: 600 !important;
 }
 
-
-/* Upload button text */
 [data-testid="stFileUploader"] button span,
 [data-testid="stFileUploader"] button p {
     color: #FFFFFF !important;
 }
 
-
-/* Upload hover */
 [data-testid="stFileUploader"] button:hover {
     background-color: #541F49 !important;
     border-color: #541F49 !important;
 }
 
-
-/* Upload button focus/click */
 [data-testid="stFileUploader"] button:focus,
 [data-testid="stFileUploader"] button:focus-visible,
 [data-testid="stFileUploader"] button:active {
     background-color: #6B3A5E !important;
     border-color: #6B3A5E !important;
-
     color: #FFFFFF !important;
-
     box-shadow: none !important;
 }
 
@@ -290,14 +239,12 @@ st.caption(
 
 [data-testid="stMetricValue"] {
     color: #541F49 !important;
-
     font-size: 28px !important;
     font-weight: 700 !important;
 }
 
 [data-testid="stMetricLabel"] {
     color: #6F6A6D !important;
-
     font-size: 19px !important;
 }
 
@@ -308,7 +255,6 @@ st.caption(
 
 [data-testid="stExpander"] {
     background-color: #FFFFFF !important;
-
     border: 1px solid #DDD9D7 !important;
     border-radius: 8px !important;
 }
@@ -361,25 +307,14 @@ hr {
    SCROLLBAR - SUBTLE
    ========================================================= */
 
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #F7F6F4;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #C8C3C0;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #A9A2A5;
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #F7F6F4; }
+::-webkit-scrollbar-thumb { background: #C8C3C0; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #A9A2A5; }
 
 </style>
 """, unsafe_allow_html=True)
+
 
 # --------------------------------------------------------------------------
 # HEADER
@@ -397,10 +332,9 @@ with title_col:
     )
 
 if not os.environ.get("GOOGLE_API_KEY"):
-    st.error(
-        "GOOGLE_API_KEY not found. Add it to your .env file and restart the app."
-    )
+    st.error("GOOGLE_API_KEY not found. Add it to your .env file and restart the app.")
     st.stop()
+
 
 # --------------------------------------------------------------------------
 # HELPERS
@@ -454,11 +388,104 @@ def parse_json_response(text):
 
 
 def get_llm():
-    return ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
+    return ChatGoogleGenerativeAI(model="gemini-2.0-flash-lite", temperature=0)
 
 
 # --------------------------------------------------------------------------
-# STEP 1: Extract required skills from JD — cached by content hash
+# EMBEDDING MODEL — cached once for entire session
+# --------------------------------------------------------------------------
+@st.cache_resource
+def get_embedding_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+
+# --------------------------------------------------------------------------
+# OPTIMIZATION 1: Single batch encode for ALL texts at once
+# Encodes JD + all resumes + all skills in ONE model.encode() call
+# --------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def batch_encode_all(
+    jd_text: str,
+    resume_texts: tuple,
+    skill_texts: tuple,
+) -> tuple:
+    model = get_embedding_model()
+    all_texts = [jd_text] + list(resume_texts) + list(skill_texts)
+    all_embeddings = model.encode(
+        all_texts,
+        batch_size=256,            # IMPROVED: larger batch
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    )
+    jd_embedding      = all_embeddings[0]
+    n_resumes         = len(resume_texts)
+    resume_embeddings = all_embeddings[1 : 1 + n_resumes]
+    skill_embeddings  = all_embeddings[1 + n_resumes :]
+    return jd_embedding, resume_embeddings, skill_embeddings
+
+
+# --------------------------------------------------------------------------
+# OPTIMIZATION 2: Pre-encode ALL resume chunks in ONE batch call
+# Returns dict: { resume_name -> np.ndarray of chunk embeddings }
+# This eliminates per-resume encode() calls inside compute_skill_match
+# --------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def batch_encode_all_chunks(resume_texts: tuple, resume_names: tuple) -> dict:
+    """
+    Encodes every line/chunk from every resume in a single model.encode() call.
+    Previously each resume re-encoded its own chunks separately — N encode calls.
+    Now it's ONE call regardless of how many resumes there are.
+    """
+    model = get_embedding_model()
+
+    all_chunks  = []
+    chunk_owner = []  # tracks which resume each chunk belongs to
+
+    for name, text in zip(resume_names, resume_texts):
+        chunks = [l.strip() for l in text.splitlines() if len(l.strip()) >= 15]
+        all_chunks.extend(chunks)
+        chunk_owner.extend([name] * len(chunks))
+
+    if not all_chunks:
+        return {name: np.array([]) for name in resume_names}
+
+    # Single encode for ALL chunks across ALL resumes
+    all_embeddings = model.encode(
+        all_chunks,
+        batch_size=256,            # IMPROVED: larger batch
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    )
+
+    # Split embeddings back by resume owner
+    chunk_embedding_map: dict = {}
+    for i, owner in enumerate(chunk_owner):
+        if owner not in chunk_embedding_map:
+            chunk_embedding_map[owner] = []
+        chunk_embedding_map[owner].append(all_embeddings[i])
+
+    # Convert lists to np arrays
+    return {
+        name: np.array(chunk_embedding_map[name]) if name in chunk_embedding_map else np.array([])
+        for name in resume_names
+    }
+
+
+# --------------------------------------------------------------------------
+# SEMANTIC SIMILARITY
+# --------------------------------------------------------------------------
+def compute_semantic_similarity(
+    jd_embedding: np.ndarray,
+    resume_embeddings: np.ndarray,
+) -> list:
+    similarities = np.dot(resume_embeddings, jd_embedding)
+    return [round(float(s) * 100) for s in similarities]
+
+
+# --------------------------------------------------------------------------
+# STEP 1: Extract required skills from JD
 # --------------------------------------------------------------------------
 JD_SKILLS_PROMPT = PromptTemplate(
     input_variables=["job_description"],
@@ -482,152 +509,45 @@ Do NOT include soft skills like "communication" or "teamwork".
 
 @st.cache_data(show_spinner=False)
 def extract_jd_skills(jd_text: str) -> list:
-    """Cached by JD content — only runs once per unique JD."""
     prompt = JD_SKILLS_PROMPT.format(job_description=jd_text)
     response = get_llm().invoke(prompt)
     data = parse_json_response(response.content)
     return [s.lower() for s in data.get("required_skills", [])]
-@st.cache_resource
-def get_embedding_model():
-    return SentenceTransformer("all-MiniLM-L6-v2")
-
-# --------------------------------------------------------------------------
-# STEP 2: Semantic Embeddings
-# --------------------------------------------------------------------------
-
-@st.cache_data(show_spinner=False)
-def generate_embeddings(texts: tuple) -> np.ndarray:
-    """
-    Generate local embeddings for multiple texts.
-
-    Embeddings are generated locally.
-    No Gemini embedding API call is made.
-    """
-
-    model = get_embedding_model()
-
-    embeddings = model.encode(
-        list(texts),
-        batch_size=32,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False
-    )
-
-    return embeddings
-
-
-def cosine_similarity_score(a, b):
-    """
-    Calculate cosine similarity between two normalized vectors.
-    """
-
-    return float(np.dot(a, b))
-
-
-def compute_semantic_similarity(
-    jd_embedding: np.ndarray,
-    resume_embeddings: np.ndarray
-) -> list:
-    """
-    Calculate JD ↔ Resume semantic similarity locally.
-    """
-
-    similarities = np.dot(
-        resume_embeddings,
-        jd_embedding
-    )
-
-    return [
-        round(float(score) * 100)
-        for score in similarities
-    ]
 
 
 # --------------------------------------------------------------------------
-# STEP 3: Deterministic scoring (no LLM)
+# STEP 3: Skill match — now uses precomputed chunk embeddings per resume
+# No model.encode() call here at all — everything already encoded above
 # --------------------------------------------------------------------------
-
 def compute_skill_match(
-    resume_text: str,
-    required_skills: list
+    resume_name: str,
+    required_skills: list,
+    precomputed_skill_embeddings: np.ndarray,
+    precomputed_chunk_embeddings: np.ndarray,  # IMPROVED: passed in, not re-computed
 ) -> tuple:
 
     if not required_skills:
         return 0, [], []
 
-    # Resume ko lines mein divide karo
-    chunks = [
-        line.strip()
-        for line in resume_text.splitlines()
-        if len(line.strip()) >= 15
-    ]
-
-    if not chunks:
+    if precomputed_chunk_embeddings.size == 0:
         return 0, [], []
 
-    # Local embedding model
-    model = get_embedding_model()
-
-    # Required skills embeddings
-    skill_embeddings = model.encode(
-        required_skills,
-        batch_size=32,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False
-    )
-
-    # Resume chunks embeddings
-    chunk_embeddings = model.encode(
-        chunks,
-        batch_size=32,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False
-    )
-
-    # Each skill vs every resume chunk
-    similarities = np.dot(
-        skill_embeddings,
-        chunk_embeddings.T
-    )
+    # skill_embeddings shape: (n_skills, dim)
+    # chunk_embeddings shape: (n_chunks, dim)
+    similarities = np.dot(precomputed_skill_embeddings, precomputed_chunk_embeddings.T)
 
     matched = []
     missing = []
-
     MATCH_THRESHOLD = 0.50
 
-    for skill, skill_similarities in zip(
-        required_skills,
-        similarities
-    ):
-
-        best_similarity = float(
-            np.max(skill_similarities)
-        )
-
-        print(
-            f"{skill}: {best_similarity:.4f}"
-        )
-
-        if best_similarity >= MATCH_THRESHOLD:
+    for skill, skill_sims in zip(required_skills, similarities):
+        best = float(np.max(skill_sims))
+        if best >= MATCH_THRESHOLD:
             matched.append(skill)
         else:
             missing.append(skill)
 
-    score = round(
-        len(matched) /
-        len(required_skills) *
-        100
-    )
-
-    print("\n--- SKILL MATCH DEBUG ---")
-    print("Required skills:", required_skills)
-    print("Matched:", matched)
-    print("Missing:", missing)
-    print("Skill Score:", score)
-
+    score = round(len(matched) / len(required_skills) * 100)
     return score, matched, missing
 
 
@@ -646,10 +566,10 @@ def score_education(resume_text: str) -> int:
 
 def score_experience(resume_text: str, jd_text: str) -> int:
     resume_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", resume_text.lower())
-    jd_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", jd_text.lower())
+    jd_years     = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", jd_text.lower())
     if resume_years and jd_years:
         candidate_exp = max(int(y) for y in resume_years)
-        required_exp = max(int(y) for y in jd_years)
+        required_exp  = max(int(y) for y in jd_years)
         if candidate_exp >= required_exp:
             return 100
         return round((candidate_exp / required_exp) * 100)
@@ -688,40 +608,36 @@ def score_formatting(resume_text: str) -> int:
 
 
 def score_resume_deterministic(
+    resume_name: str,
     resume_text: str,
     jd_text: str,
     required_skills: list,
     semantic_score: int,
-    resume_embedding: np.ndarray,
-    skill_embeddings: np.ndarray,
+    precomputed_skill_embeddings: np.ndarray,
+    precomputed_chunk_embeddings: np.ndarray,  # IMPROVED: passed in
 ) -> dict:
 
-    skill_score, matched, missing = compute_skill_match(
-        resume_text,
-        required_skills
-    )
+    # Sub-scores run in parallel within each resume
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        f_skill  = ex.submit(
+            compute_skill_match,
+            resume_name,
+            required_skills,
+            precomputed_skill_embeddings,
+            precomputed_chunk_embeddings,   # no re-encode — already done
+        )
+        f_exp    = ex.submit(score_experience, resume_text, jd_text)
+        f_edu    = ex.submit(score_education, resume_text)
+        f_proj   = ex.submit(score_projects, resume_text)
+        f_fmt    = ex.submit(score_formatting, resume_text)
 
-    combined_skill = round(
-        skill_score * 0.7 +
-        semantic_score * 0.3
-    )
+        skill_score, matched, missing = f_skill.result()
+        experience_score = f_exp.result()
+        education_score  = f_edu.result()
+        projects_score   = f_proj.result()
+        formatting_score = f_fmt.result()
 
-    experience_score = score_experience(
-        resume_text,
-        jd_text
-    )
-
-    education_score = score_education(
-        resume_text
-    )
-
-    projects_score = score_projects(
-        resume_text
-    )
-
-    formatting_score = score_formatting(
-        resume_text
-    )
+    combined_skill = round(skill_score * 0.7 + semantic_score * 0.3)
 
     ats_score = round(
         combined_skill   * 0.40 +
@@ -732,21 +648,21 @@ def score_resume_deterministic(
     )
 
     return {
-        "ats_score": ats_score,
-        "final_score": ats_score,
-        "skill_match": combined_skill,
-        "experience_score": experience_score,
-        "education_score": education_score,
-        "projects_score": projects_score,
-        "formatting_score": formatting_score,
-        "matched_skills": [s.title() for s in matched],
-        "missing_skills": [s.title() for s in missing],
-        "suggestions": [],
+        "ats_score":         ats_score,
+        "final_score":       ats_score,
+        "skill_match":       combined_skill,
+        "experience_score":  experience_score,
+        "education_score":   education_score,
+        "projects_score":    projects_score,
+        "formatting_score":  formatting_score,
+        "matched_skills":    [s.title() for s in matched],
+        "missing_skills":    [s.title() for s in missing],
+        "suggestions":       [],
     }
 
 
 # --------------------------------------------------------------------------
-# STEP 4: LLM suggestions — Stage 2, top-N only
+# STEP 4: LLM suggestions — top-N only, parallel
 # --------------------------------------------------------------------------
 SUGGESTIONS_PROMPT = PromptTemplate(
     input_variables=["job_description", "resume_text", "missing_skills"],
@@ -796,7 +712,7 @@ def enrich_with_suggestions_parallel(
     top_results = results[:top_n]
 
     def fetch(r):
-        name = r["candidate_name"]
+        name    = r["candidate_name"]
         missing = [s.lower() for s in r.get("missing_skills", [])]
         r["suggestions"] = get_suggestions(resume_texts[name], jd_text, missing)
         return name
@@ -828,7 +744,7 @@ with st.sidebar:
     st.markdown("---")
 
     top_n_suggestions = st.number_input(
-        "Top  Candidates",
+        "Top Candidates",
         min_value=1, max_value=10,
         value=5, step=1,
         help="AI suggestions generated only for top N ranked candidates.",
@@ -840,11 +756,10 @@ with st.sidebar:
     )
 
 
-
 # --------------------------------------------------------------------------
 # FILE UPLOADS
 # --------------------------------------------------------------------------
-jd_file = st.file_uploader("Upload Job Description (PDF or TXT)", type=["pdf", "txt"])
+jd_file      = st.file_uploader("Upload Job Description (PDF or TXT)", type=["pdf", "txt"])
 resume_files = st.file_uploader(
     "Upload Resumes (PDF) — select multiple",
     type=["pdf"],
@@ -864,24 +779,22 @@ if analyze_clicked:
         st.error("Please upload at least one resume.")
         st.stop()
 
-    # ── JD processing ───────────────────────────────────────────────────────
+    # ── JD text extraction ──────────────────────────────────────────────────
     with st.spinner("Reading job description..."):
         jd_text = extract_text_from_uploaded(jd_file)
     if not jd_text.strip():
         st.error("Couldn't extract text from the job description.")
         st.stop()
 
-    with st.spinner("Extracting required skills from job description..."):
-        required_skills = extract_jd_skills(jd_text)
-    st.info(f"📋 **Required skills identified:** {', '.join(s.title() for s in required_skills)}")
+    # ── JD skill extraction runs in background while PDFs extract ───────────
+    progress = st.progress(0.0, text="Extracting resumes and JD skills in parallel...")
 
-    
+    jd_skills_executor = ThreadPoolExecutor(max_workers=1)
+    jd_skills_future   = jd_skills_executor.submit(extract_jd_skills, jd_text)
 
-    # ── PHASE 1: Parallel PDF extraction ────────────────────────────────────
-    progress = st.progress(0.0, text="Extracting resume text in parallel...")
-
+    # ── PHASE 1: Parallel PDF extraction ───────────────────────────────────
     resume_texts: dict = {}
-    failed: list = []
+    failed: list       = []
 
     def extract_one(rf):
         text = extract_text_from_uploaded(rf)
@@ -903,104 +816,79 @@ if analyze_clicked:
                 st.warning(f"Failed to read {name}: {e}")
                 failed.append(name)
             done += 1
-            progress.progress(done / len(resume_files) * 0.3, text=f"Extracted {done}/{len(resume_files)} resumes...")
+            progress.progress(
+                done / len(resume_files) * 0.25,
+                text=f"Extracted {done}/{len(resume_files)} resumes..."
+            )
 
     if not resume_texts:
         st.error("No resumes could be read.")
         st.stop()
 
-      # ── PHASE 2: Local Semantic Embeddings ────────────────────────────────
-    progress.progress(
-        0.35,
-        text="Generating local semantic embeddings..."
-    )
+    # ── Collect JD skills ───────────────────────────────────────────────────
+    progress.progress(0.28, text="Finalising required skills...")
+    required_skills = jd_skills_future.result()
+    jd_skills_executor.shutdown(wait=False)
+
+    st.info(f"📋 **Required skills identified:** {', '.join(s.title() for s in required_skills)}")
+
+    # ── PHASE 2: ONE batch encode — JD + resumes + skills together ──────────
+    progress.progress(0.32, text="Encoding JD, resumes and skills in one batch...")
 
     names_ordered = list(resume_texts.keys())
+    texts_ordered = [resume_texts[n] for n in names_ordered]
 
-    texts_ordered = [
-        resume_texts[name]
-        for name in names_ordered
-    ]
-
-    jd_embedding = generate_embeddings(
-        (jd_text,)
-    )[0]
-
-    resume_embeddings = generate_embeddings(
-        tuple(texts_ordered)
+    jd_embedding, resume_embeddings_arr, skill_embeddings_arr = batch_encode_all(
+        jd_text,
+        tuple(texts_ordered),
+        tuple(required_skills),
     )
 
-    skill_embeddings = generate_embeddings(
-        tuple(required_skills)
+    semantic_scores = compute_semantic_similarity(jd_embedding, resume_embeddings_arr)
+    semantic_map    = dict(zip(names_ordered, semantic_scores))
+
+    # ── PHASE 2b: ONE batch encode — ALL resume chunks together ─────────────
+    # KEY IMPROVEMENT: eliminates N separate encode() calls inside skill match
+    progress.progress(0.40, text="Encoding all resume chunks in one batch...")
+
+    chunk_embedding_map = batch_encode_all_chunks(
+        tuple(texts_ordered),
+        tuple(names_ordered),
     )
 
-    semantic_scores = compute_semantic_similarity(
-        jd_embedding,
-        resume_embeddings
-    )
+    progress.progress(0.48, text="All embeddings ready.")
 
-    semantic_map = dict(
-        zip(
-            names_ordered,
-            semantic_scores
-        )
-    )
-
-    resume_embedding_map = dict(
-        zip(
-            names_ordered,
-            resume_embeddings
-        )
-    )
-    # ── PHASE 3: Parallel deterministic scoring ──────────────────────────────
-    progress.progress(
-        0.4,
-        text="Scoring resumes in parallel..."
-    )
+    # ── PHASE 3: Parallel deterministic scoring ─────────────────────────────
+    progress.progress(0.50, text="Scoring resumes in parallel...")
 
     results: list = []
 
     def score_one(name):
-        text = resume_texts[name]
-
+        text   = resume_texts[name]
         result = score_resume_deterministic(
+            resume_name=name,
             resume_text=text,
             jd_text=jd_text,
             required_skills=required_skills,
             semantic_score=semantic_map[name],
-            resume_embedding=resume_embedding_map[name],
-            skill_embeddings=skill_embeddings,
+            precomputed_skill_embeddings=skill_embeddings_arr,
+            precomputed_chunk_embeddings=chunk_embedding_map[name],  # ← pre-encoded
         )
-
         result["candidate_name"] = name
-
         return result
 
-    with ThreadPoolExecutor(
-        max_workers=min(len(resume_texts), 8)
-    ) as executor:
-
-        futures = {
-            executor.submit(score_one, n): n
-            for n in names_ordered
-        }
-
+    with ThreadPoolExecutor(max_workers=min(len(resume_texts), 8)) as executor:
+        futures = {executor.submit(score_one, n): n for n in names_ordered}
         done = 0
-
         for future in as_completed(futures):
             try:
                 results.append(future.result())
-
             except Exception as e:
                 name = futures[future]
-                st.warning(
-                    f"Scoring failed for {name}: {e}"
-                )
-
+                st.warning(f"Scoring failed for {name}: {e}")
             done += 1
-
             progress.progress(
-                0.4 + done / len(resume_texts) * 0.3,
+                0.50 + done / len(resume_texts) * 0.22,
                 text=f"Scored {done}/{len(resume_texts)} resumes..."
             )
 
@@ -1008,37 +896,17 @@ if analyze_clicked:
         st.error("No resumes could be scored.")
         st.stop()
 
-
     # ── PHASE 4: Rank ────────────────────────────────────────────────────────
-    results.sort(
-        key=lambda r: r["final_score"],
-        reverse=True
-    )
+    results.sort(key=lambda r: r["final_score"], reverse=True)
 
+    # ── PHASE 5: LLM suggestions for top-N only ─────────────────────────────
+    actual_top_n = min(top_n_suggestions, len(results))
 
-    # ── PHASE 5: LLM suggestions for top-N only ──────────────────────────────
-    actual_top_n = min(
-        top_n_suggestions,
-        len(results)
-    )
+    progress.progress(0.74, text=f"Generating AI suggestions for top {actual_top_n} candidates...")
 
-    progress.progress(
-        0.70,
-        text=f"Generating AI suggestions for top {actual_top_n} candidates..."
-    )
+    enrich_with_suggestions_parallel(results, resume_texts, jd_text, actual_top_n)
 
-    enrich_with_suggestions_parallel(
-        results,
-        resume_texts,
-        jd_text,
-        actual_top_n
-    )
-
-    progress.progress(
-        1.0,
-        text="Done!"
-    )
-
+    progress.progress(1.0, text="Done!")
     progress.empty()
 
     # ── RANKING DISPLAY ──────────────────────────────────────────────────────
@@ -1047,7 +915,7 @@ if analyze_clicked:
 
     for rank, r in enumerate(results, start=1):
         shortlisted = r["final_score"] >= shortlist_threshold
-        badge = "✅ Shortlisted" if shortlisted else "❌ Not shortlisted"
+        badge       = "✅ Shortlisted" if shortlisted else "❌ Not shortlisted"
         has_suggestions = bool(r.get("suggestions"))
 
         with st.container(border=True):
@@ -1059,74 +927,45 @@ if analyze_clicked:
 
             with st.expander("Details"):
                 c1, c2, c3, c4, c5 = st.columns(5)
-
-                c1.metric(
-                    "Skill Match",
-                    f"{r.get('skill_match', 0)}%"
-                )
-                c2.metric(
-                    "Experience",
-                    f"{r.get('experience_score', 0)}%"
-                )
-                c3.metric(
-                    "Education",
-                    f"{r.get('education_score', 0)}%"
-                )
-                c4.metric(
-                    "Projects",
-                    f"{r.get('projects_score', 0)}%"
-                )
-                c5.metric(
-                    "Formatting",
-                    f"{r.get('formatting_score', 0)}%"
-                )
+                c1.metric("Skill Match",  f"{r.get('skill_match', 0)}%")
+                c2.metric("Experience",   f"{r.get('experience_score', 0)}%")
+                c3.metric("Education",    f"{r.get('education_score', 0)}%")
+                c4.metric("Projects",     f"{r.get('projects_score', 0)}%")
+                c5.metric("Formatting",   f"{r.get('formatting_score', 0)}%")
 
                 d1, d2 = st.columns(2)
-
                 with d1:
                     st.markdown("**✅ Matched Skills**")
                     for skill in r.get("matched_skills", []):
                         st.markdown(f"- {skill}")
-
                 with d2:
                     st.markdown("**❌ Missing Skills**")
                     for skill in r.get("missing_skills", []):
                         st.markdown(f"- {skill}")
 
                 st.markdown("**💡 Suggestions**")
-
                 if has_suggestions:
                     for s in r["suggestions"]:
                         st.markdown(f"- {s}")
                 else:
                     st.caption(
-                        f"_AI suggestions generated for top "
-                        f"{actual_top_n} candidates only._"
+                        f"_AI suggestions generated for top {actual_top_n} candidates only._"
                     )
 
-
-    # ── SUMMARY ─────────────────────────────────────────────────────────────
+    # ── SUMMARY ──────────────────────────────────────────────────────────────
     st.divider()
 
     shortlisted_names = [
-        r["candidate_name"]
-        for r in results
+        r["candidate_name"] for r in results
         if r["final_score"] >= shortlist_threshold
     ]
 
     if shortlisted_names:
-        st.success(
-            f"✅ Recommended to shortlist: "
-            f"{', '.join(shortlisted_names)}"
-        )
+        st.success(f"✅ Recommended to shortlist: {', '.join(shortlisted_names)}")
     else:
-        st.info(
-            "No candidates met the shortlist threshold. "
-            "Try lowering it in the sidebar."
-        )
+        st.info("No candidates met the shortlist threshold. Try lowering it in the sidebar.")
 
     total_llm_calls = 1 + actual_top_n
-
     st.caption(
         f"⚡ Total Gemini LLM calls this run: **{total_llm_calls}** "
         f"(1 JD extraction + {actual_top_n} suggestions). "
