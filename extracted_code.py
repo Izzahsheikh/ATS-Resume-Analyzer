@@ -21,14 +21,32 @@ load_dotenv()
 # --------------------------------------------------------------------------
 # PAGE CONFIG
 # --------------------------------------------------------------------------
-st.set_page_config(page_title="AI ATS Resume Analyzer", page_icon="📄", layout="wide")
-st.title("📄 AI ATS Resume Analyzer")
-st.caption("Upload multiple resumes and one job description to rank and shortlist candidates.")
+st.set_page_config(
+    page_title="AI ATS Resume Analyzer",
+    page_icon="📄",
+    layout="wide"
+)
+
+# --------------------------------------------------------------------------
+# HEADER
+# --------------------------------------------------------------------------
+logo_col, title_col = st.columns([0.7, 5])
+
+with logo_col:
+    st.image("assets/izra_logo_cropped.png", width=180)
+
+with title_col:
+    st.title("AI ATS Resume Analyzer")
+    st.caption(
+        "Upload multiple resumes and one job description "
+        "to rank and shortlist candidates."
+    )
 
 if not os.environ.get("GOOGLE_API_KEY"):
-    st.error("GOOGLE_API_KEY not found. Add it to your .env file and restart the app.")
+    st.error(
+        "GOOGLE_API_KEY not found. Add it to your .env file and restart the app."
+    )
     st.stop()
-
 
 # --------------------------------------------------------------------------
 # HELPERS
