@@ -22,11 +22,11 @@ load_dotenv()
 # PAGE CONFIG
 # --------------------------------------------------------------------------
 st.set_page_config(
-    page_title="AI ATS Resume Analyzer",
-    page_icon="📄",
-    layout="wide"
+    page_title="Izra | AI Resume Analyzer",
+    page_icon="assets/izra_logo_cropped.png",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
-
 
 # --------------------------------------------------------------------------
 # CUSTOM UI THEME
@@ -53,7 +53,7 @@ st.markdown("""
    ========================================================= */
 
 section[data-testid="stSidebar"] {
-    background-color: #EFEEEC;
+    background-color: #EFEEEC !important;
     border-right: 1px solid #DDD9D7;
 }
 
@@ -69,10 +69,10 @@ section[data-testid="stSidebar"] p {
     color: #292529 !important;
 }
 
-/* Sidebar descriptions / help text */
+/* Sidebar descriptions */
 section[data-testid="stSidebar"] .stMarkdown p {
     color: #6F6A6D !important;
-    font-size: 19px !important;
+    font-size: 16px !important;
     line-height: 1.5 !important;
 }
 
@@ -101,45 +101,93 @@ h3 {
 
 
 /* =========================================================
-   SIDEBAR NUMBER INPUTS
+   THRESHOLD VALUE BOX
    ========================================================= */
 
-/* Compact box */
+/* Outer text input container */
 section[data-testid="stSidebar"]
-div[data-testid="stNumberInput"] {
-    width: 140px;
+div[data-testid="stTextInput"] > div {
+    background-color: #FFFFFF !important;
+    border-radius: 7px !important;
 }
 
+/* Actual value input */
 section[data-testid="stSidebar"]
-div[data-testid="stNumberInput"] > div {
-    width: 140px;
-}
-
-/* Input */
-section[data-testid="stSidebar"]
-div[data-testid="stNumberInput"] input {
+div[data-testid="stTextInput"] input {
     background-color: #FFFFFF !important;
     color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
 
-    font-size: 19px !important;
+    text-align: center !important;
+
+    font-size: 18px !important;
     font-weight: 600 !important;
-}
 
-/* +/- buttons */
-section[data-testid="stSidebar"]
-div[data-testid="stNumberInput"] button {
-    width: 32px !important;
-    min-width: 32px !important;
+    border: 1px solid #D8D4D1 !important;
+    border-radius: 7px !important;
 
-    color: #541F49 !important;
-    background-color: #FFFFFF !important;
+    color-scheme: light !important;
 }
 
 /* Focus */
 section[data-testid="stSidebar"]
-div[data-testid="stNumberInput"] input:focus {
+div[data-testid="stTextInput"] input:focus {
+    background-color: #FFFFFF !important;
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
+
     border-color: #541F49 !important;
     box-shadow: 0 0 0 1px #541F49 !important;
+}
+
+
+/* =========================================================
+   THRESHOLD MINUS / PLUS BUTTONS
+   ========================================================= */
+
+section[data-testid="stSidebar"]
+.stButton > button {
+    min-height: 40px !important;
+    padding: 0 !important;
+
+    background-color: #541F49 !important;
+    border: 1px solid #541F49 !important;
+    border-radius: 7px !important;
+
+    color: #FFFFFF !important;
+
+    font-size: 22px !important;
+    font-weight: 600 !important;
+}
+
+/* Button text */
+section[data-testid="stSidebar"]
+.stButton > button p,
+section[data-testid="stSidebar"]
+.stButton > button span {
+    color: #FFFFFF !important;
+}
+
+/* Hover */
+section[data-testid="stSidebar"]
+.stButton > button:hover {
+    background-color: #6B3A5E !important;
+    border-color: #6B3A5E !important;
+    color: #FFFFFF !important;
+}
+
+/* After click */
+section[data-testid="stSidebar"]
+.stButton > button:focus,
+section[data-testid="stSidebar"]
+.stButton > button:focus-visible,
+section[data-testid="stSidebar"]
+.stButton > button:active {
+    background-color: #541F49 !important;
+    border-color: #541F49 !important;
+    color: #FFFFFF !important;
+
+    box-shadow: none !important;
 }
 
 
@@ -153,7 +201,6 @@ div[data-testid="stNumberInput"] input:focus {
     border-radius: 8px !important;
 
     min-height: 48px !important;
-
     padding: 0 24px !important;
 
     color: #FFFFFF !important;
@@ -166,20 +213,16 @@ div[data-testid="stNumberInput"] input:focus {
         border-color 0.15s ease !important;
 }
 
-/* Button text */
 .stButton > button p,
 .stButton > button span {
     color: #FFFFFF !important;
 }
 
-/* Hover ONLY while cursor is over button */
 .stButton > button:hover {
     background-color: #541F49 !important;
     border-color: #541F49 !important;
-    color: #FFFFFF !important;
 }
 
-/* After click / focus -> return to normal color */
 .stButton > button:focus,
 .stButton > button:focus-visible,
 .stButton > button:active {
@@ -204,8 +247,7 @@ div[data-testid="stNumberInput"] input:focus {
     padding: 4px !important;
 }
 
-
-/* Upload dropzone */
+/* Dropzone */
 [data-testid="stFileUploaderDropzone"] {
     background-color: #F0EFEC !important;
 
@@ -213,18 +255,16 @@ div[data-testid="stNumberInput"] input:focus {
     border-radius: 7px !important;
 }
 
-
 /* Upload label */
 [data-testid="stFileUploader"] label {
     color: #292529 !important;
     font-size: 19px !important;
 }
 
-
-/* Upload helper text */
+/* Helper text */
 [data-testid="stFileUploader"] small {
     color: #6F6A6D !important;
-    font-size: 19px !important;
+    font-size: 16px !important;
 }
 
 
@@ -245,17 +285,8 @@ div[data-testid="stNumberInput"] input:focus {
     color: #FFFFFF !important;
 
     font-size: 19px !important;
-    font-weight: 600 !important;# --------------------------------------------------------------------------
-# PAGE CONTENT
-# --------------------------------------------------------------------------
-
-st.title("📄 AI ATS Resume Analyzer")
-
-st.caption(
-    "Upload multiple resumes and one job description to rank and shortlist candidates."
-)
+    font-weight: 600 !important;
 }
-
 
 /* Upload button text */
 [data-testid="stFileUploader"] button span,
@@ -263,15 +294,13 @@ st.caption(
     color: #FFFFFF !important;
 }
 
-
 /* Upload hover */
 [data-testid="stFileUploader"] button:hover {
     background-color: #541F49 !important;
     border-color: #541F49 !important;
 }
 
-
-/* Upload button focus/click */
+/* Upload focus/click */
 [data-testid="stFileUploader"] button:focus,
 [data-testid="stFileUploader"] button:focus-visible,
 [data-testid="stFileUploader"] button:active {
@@ -297,7 +326,6 @@ st.caption(
 
 [data-testid="stMetricLabel"] {
     color: #6F6A6D !important;
-
     font-size: 19px !important;
 }
 
@@ -349,7 +377,7 @@ hr {
 
 
 /* =========================================================
-   GENERAL MARKDOWN TEXT
+   GENERAL MARKDOWN
    ========================================================= */
 
 .stMarkdown {
@@ -358,7 +386,7 @@ hr {
 
 
 /* =========================================================
-   SCROLLBAR - SUBTLE
+   SCROLLBAR
    ========================================================= */
 
 ::-webkit-scrollbar {
@@ -387,20 +415,19 @@ hr {
 logo_col, title_col = st.columns([0.7, 5])
 
 with logo_col:
-    st.image("assets/izra_logo_cropped.png", width=180)
+    st.image("assets/izra_logo_cropped.png", width=150)
 
 with title_col:
-    st.title("AI ATS Resume Analyzer")
-    st.caption(
-        "Upload multiple resumes and one job description "
-        "to rank and shortlist candidates."
+    st.markdown(
+        "<h1 style='margin-bottom:0;'>AI Resume Analyzer</h1>",
+        unsafe_allow_html=True
     )
-
-if not os.environ.get("GOOGLE_API_KEY"):
-    st.error(
-        "GOOGLE_API_KEY not found. Add it to your .env file and restart the app."
+    st.markdown(
+        "<p style='color:#6F6A6D; font-size:18px; margin-top:4px;'>"
+        "Find the right candidates faster with AI-powered screening."
+        "</p>",
+        unsafe_allow_html=True
     )
-    st.stop()
 
 # --------------------------------------------------------------------------
 # HELPERS
@@ -810,47 +837,209 @@ def enrich_with_suggestions_parallel(
 # --------------------------------------------------------------------------
 # SIDEBAR
 # --------------------------------------------------------------------------
-with st.sidebar:
-    st.header("Settings")
-
-    shortlist_threshold = st.number_input(
-        "Shortlist Threshold (%)",
-        min_value=0, max_value=100,
-        value=75, step=1,
-        help="Candidates at or above this ATS score will be shortlisted.",
+if "shortlist_threshold" not in st.session_state:
+    st.session_state.shortlist_threshold = 70
+if "threshold_text" not in st.session_state:
+    st.session_state.threshold_text = "70"  
+def decrease_threshold():
+    new_value = max(
+        0,
+        st.session_state.shortlist_threshold - 1
     )
+
+    st.session_state.shortlist_threshold = new_value
+    st.session_state.threshold_text = str(new_value)
+
+
+def increase_threshold():
+    new_value = min(
+        100,
+        st.session_state.shortlist_threshold + 1
+    )
+
+    st.session_state.shortlist_threshold = new_value
+    st.session_state.threshold_text = str(new_value)
+
+
+def update_threshold():
+    try:
+        value = int(st.session_state.threshold_text)
+
+        if 0 <= value <= 100:
+            st.session_state.shortlist_threshold = value
+        else:
+            st.session_state.threshold_text = str(
+                st.session_state.shortlist_threshold
+            )
+
+    except ValueError:
+        st.session_state.threshold_text = str(
+            st.session_state.shortlist_threshold
+        )        
+with st.sidebar:
+
     st.markdown(
-        "<p style='color:white; font-size:18px; margin-top:2px;'>"
-        "Sets the minimum ATS score a candidate must achieve to be shortlisted for review.</p>",
-        unsafe_allow_html=True,
+        "<h2 style='margin-bottom:5px;'>Screening Settings</h2>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        "<p style='color:#6F6A6D; font-size:15px;'>"
+        "Configure how candidates are evaluated."
+        "</p>",
+        unsafe_allow_html=True
     )
 
     st.markdown("---")
 
-    top_n_suggestions = st.number_input(
-        "Top  Candidates",
-        min_value=1, max_value=10,
-        value=5, step=1,
-        help="AI suggestions generated only for top N ranked candidates.",
-    )
+    # Shortlist threshold
+    # Shortlist threshold
     st.markdown(
-        "<p style='color:white; font-size:18px; margin-top:2px;'>"
-        "Number of top-ranked candidates who will receive detailed description</p>",
-        unsafe_allow_html=True,
+    "<p style='font-weight:600; color:#292529; margin-bottom:8px;'>"
+    "Shortlist Threshold"
+    "</p>",
+    unsafe_allow_html=True
+ )
+
+    minus_col, value_col, plus_col = st.columns(
+    [1, 1.5, 1] 
+ )
+
+
+ # MINUS
+    with minus_col:
+
+     st.button(
+        "−",
+        key="threshold_minus",
+        use_container_width=True,
+        on_click=decrease_threshold
+    )
+
+
+ # VALUE
+    with value_col:
+
+     st.text_input(
+        "Threshold",
+        key="threshold_text",
+        label_visibility="collapsed",
+        on_change=update_threshold
+    )
+
+
+ # PLUS
+    with plus_col:
+
+     st.button(
+        "＋",
+        key="threshold_plus",
+        use_container_width=True,
+        on_click=increase_threshold
+    )
+
+
+ # Value used by backend
+     shortlist_threshold = st.session_state.shortlist_threshold
+
+
+    st.markdown(
+    f"""
+    <p style='color:#6F6A6D; font-size:14px; margin-top:8px;'>
+        Candidates scoring <b>{shortlist_threshold}%</b> or higher
+        will be shortlisted.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+
+    st.markdown("---")
+
+
+
+
+
+# --------------------------------------------------------------------------
+# UPLOAD SECTION
+# --------------------------------------------------------------------------
+
+st.markdown(
+    "<h2 style='margin-top:20px;'>Start Screening</h2>",
+    unsafe_allow_html=True
+)
+
+jd_col, cv_col = st.columns(2, gap="large")
+
+# --------------------------------------------------------------------------
+# JOB DESCRIPTION
+# --------------------------------------------------------------------------
+
+with jd_col:
+
+    st.markdown(
+        """
+        <div class="upload-card-title">
+            📋 Job Description
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    jd_file = st.file_uploader(
+        "Upload Job Description",
+        type=["pdf", "txt", "docx"],
+        key="jd_upload",
+        help="Upload a PDF, TXT or DOCX job description."
+    )
+
+    st.markdown(
+        "<div class='or-divider'><span>OR</span></div>",
+        unsafe_allow_html=True
     )
 
 
 
 # --------------------------------------------------------------------------
-# FILE UPLOADS
+# CANDIDATE CVs
 # --------------------------------------------------------------------------
-jd_file = st.file_uploader("Upload Job Description (PDF or TXT)", type=["pdf", "txt"])
-resume_files = st.file_uploader(
-    "Upload Resumes (PDF) — select multiple",
-    type=["pdf"],
-    accept_multiple_files=True,
-)
-analyze_clicked = st.button("Analyze & Rank Candidates", type="primary", use_container_width=True)
+
+with cv_col:
+
+    st.markdown(
+        """
+        <div class="upload-card-title">
+            👥 Candidate CVs
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    resume_files = st.file_uploader(
+        "Upload Candidate CVs",
+        type=["pdf"],
+        accept_multiple_files=True,
+        key="resume_upload",
+        help="Select multiple candidate resumes."
+    )
+
+    st.markdown(
+        "<p class='upload-helper'>"
+        "Upload multiple PDF resumes at once."
+        "</p>",
+        unsafe_allow_html=True
+    )
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+
+button_col1, button_col2, button_col3 = st.columns([1.5, 2, 1.5])
+
+with button_col2:
+    analyze_clicked = st.button(
+        "✦ Analyze Candidates",
+        type="primary",
+        use_container_width=True
+    )
 
 
 # --------------------------------------------------------------------------
@@ -866,8 +1055,11 @@ if analyze_clicked:
 
     # ── JD processing ───────────────────────────────────────────────────────
     with st.spinner("Reading job description..."):
+
+     if jd_file:
         jd_text = extract_text_from_uploaded(jd_file)
-    if not jd_text.strip():
+    
+     if not jd_text.strip():
         st.error("Couldn't extract text from the job description.")
         st.stop()
 
