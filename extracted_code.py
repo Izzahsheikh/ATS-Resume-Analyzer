@@ -266,6 +266,11 @@ section[data-testid="stSidebar"]
     color: #6F6A6D !important;
     font-size: 16px !important;
 }
+.upload-card-title {
+    color: #292529 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+}
 
 
 /* =========================================================
@@ -406,6 +411,68 @@ hr {
     background: #A9A2A5;
 }
 
+
+/* =========================================================
+   RESULT CARD TEXT
+   ========================================================= */
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background-color: #FFFFFF !important;
+}
+
+/* Candidate name + normal text */
+[data-testid="stVerticalBlockBorderWrapper"] p,
+[data-testid="stVerticalBlockBorderWrapper"] span,
+[data-testid="stVerticalBlockBorderWrapper"] h3 {
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
+}
+
+/* HTML text inside result cards */
+[data-testid="stVerticalBlockBorderWrapper"] .stMarkdown div {
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
+}
+
+
+/* =========================================================
+   DETAILS / EXPANDER
+   ========================================================= */
+
+[data-testid="stExpander"] {
+    background-color: #FFFFFF !important;
+}
+
+[data-testid="stExpander"] p,
+[data-testid="stExpander"] span,
+[data-testid="stExpander"] li {
+    color: #292529 !important;
+}
+
+/* Matched / Missing headings */
+[data-testid="stExpander"] strong {
+    color: #292529 !important;
+}
+
+
+/* =========================================================
+   PROGRESS TEXT
+   ========================================================= */
+
+[data-testid="stProgress"] p {
+    color: #292529 !important;
+}
+
+[data-testid="stProgress"] span {
+    color: #292529 !important;
+}
+
+/* Candidate name in ranking card */
+[data-testid="stVerticalBlockBorderWrapper"] [data-testid="stMarkdownContainer"] h3 {
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
+    opacity: 1 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -768,70 +835,10 @@ def score_resume_deterministic(
         "formatting_score": formatting_score,
         "matched_skills": [s.title() for s in matched],
         "missing_skills": [s.title() for s in missing],
-        "suggestions": [],
+        
     }
 
 
-# --------------------------------------------------------------------------
-# STEP 4: LLM suggestions — Stage 2, top-N only
-# --------------------------------------------------------------------------
-SUGGESTIONS_PROMPT = PromptTemplate(
-    input_variables=["job_description", "resume_text", "missing_skills"],
-    template="""
-You are an expert technical recruiter. A candidate is applying for the following role.
-
-JOB DESCRIPTION:
-{job_description}
-
-RESUME:
-{resume_text}
-
-MISSING SKILLS (already identified):
-{missing_skills}
-
-Give 3 specific, actionable suggestions to improve this resume for this role.
-Focus on what the candidate should ADD, LEARN, or HIGHLIGHT.
-
-Respond with ONLY a valid JSON object (no markdown):
-{{
-  "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
-}}
-""",
-)
-
-
-def get_suggestions(resume_text: str, jd_text: str, missing_skills: list) -> list:
-    prompt = SUGGESTIONS_PROMPT.format(
-        job_description=jd_text,
-        resume_text=resume_text[:3000],
-        missing_skills=", ".join(missing_skills) if missing_skills else "None",
-    )
-    try:
-        response = get_llm().invoke(prompt)
-        data = parse_json_response(response.content)
-        return data.get("suggestions", [])
-    except Exception:
-        return ["Could not generate suggestions. Check your API key."]
-
-
-def enrich_with_suggestions_parallel(
-    results: list,
-    resume_texts: dict,
-    jd_text: str,
-    top_n: int,
-) -> None:
-    top_results = results[:top_n]
-
-    def fetch(r):
-        name = r["candidate_name"]
-        missing = [s.lower() for s in r.get("missing_skills", [])]
-        r["suggestions"] = get_suggestions(resume_texts[name], jd_text, missing)
-        return name
-
-    with ThreadPoolExecutor(max_workers=min(top_n, 5)) as executor:
-        futures = {executor.submit(fetch, r): r["candidate_name"] for r in top_results}
-        for future in as_completed(futures):
-            _ = future.result()
 
 
 # --------------------------------------------------------------------------
@@ -892,7 +899,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Shortlist threshold
+
     # Shortlist threshold
     st.markdown(
     "<p style='font-weight:600; color:#292529; margin-bottom:8px;'>"
@@ -1199,6 +1206,9 @@ if analyze_clicked:
     if not results:
         st.error("No resumes could be scored.")
         st.stop()
+        
+        # Remove progress bar completely after processing
+    progress.empty()
 
 
     # ── PHASE 4: Rank ────────────────────────────────────────────────────────
@@ -1208,30 +1218,7 @@ if analyze_clicked:
     )
 
 
-    # ── PHASE 5: LLM suggestions for top-N only ──────────────────────────────
-    actual_top_n = min(
-        top_n_suggestions,
-        len(results)
-    )
-
-    progress.progress(
-        0.70,
-        text=f"Generating AI suggestions for top {actual_top_n} candidates..."
-    )
-
-    enrich_with_suggestions_parallel(
-        results,
-        resume_texts,
-        jd_text,
-        actual_top_n
-    )
-
-    progress.progress(
-        1.0,
-        text="Done!"
-    )
-
-    progress.empty()
+   # suggestions
 
     # ── RANKING DISPLAY ──────────────────────────────────────────────────────
     st.divider()
@@ -1240,14 +1227,63 @@ if analyze_clicked:
     for rank, r in enumerate(results, start=1):
         shortlisted = r["final_score"] >= shortlist_threshold
         badge = "✅ Shortlisted" if shortlisted else "❌ Not shortlisted"
-        has_suggestions = bool(r.get("suggestions"))
+        
 
         with st.container(border=True):
             top = st.columns([0.5, 3, 1, 1.5])
-            top[0].markdown(f"### #{rank}")
-            top[1].markdown(f"**{r['candidate_name']}**")
-            top[2].metric("ATS Score", f"{r['final_score']}%")
-            top[3].markdown(f"**{badge}**")
+            with top[0]:
+             st.markdown(
+              f"<h3 style='color:#292529 !important;'>#{rank}</h3>",
+               unsafe_allow_html=True
+                )
+
+            with top[1]:
+             st.markdown(
+                 f"### {r['candidate_name']}"
+                )
+            with top[2]:
+             st.metric(
+              "ATS Score",
+              f"{r['final_score']}%"
+             )
+
+            with top[3]:
+
+             if shortlisted:
+                  st.markdown(
+                     """
+                      <div style="
+                      background-color:#E8F5E9;
+                      color:#2E7D32;
+                      padding:10px 16px;
+                      border-radius:8px;
+                      font-size:16px;
+                      font-weight:700;
+                      text-align:center;
+                       ">
+                     ✓ Shortlisted
+                      </div>
+                      """,
+                      unsafe_allow_html=True
+                    )
+
+             else:
+                 st.markdown(
+                      """
+                      <div style="
+                      background-color:#FDECEC;
+                      color:#C62828;
+                      padding:10px 16px;
+                      border-radius:8px;
+                     font-size:16px;
+                      font-weight:700;
+                     text-align:center;
+                      ">
+                     ✕ Not shortlisted
+                       </div>
+                     """,
+                      unsafe_allow_html=True
+                    )
 
             with st.expander("Details"):
                 c1, c2, c3, c4, c5 = st.columns(5)
@@ -1285,16 +1321,9 @@ if analyze_clicked:
                     for skill in r.get("missing_skills", []):
                         st.markdown(f"- {skill}")
 
-                st.markdown("**💡 Suggestions**")
+                
 
-                if has_suggestions:
-                    for s in r["suggestions"]:
-                        st.markdown(f"- {s}")
-                else:
-                    st.caption(
-                        f"_AI suggestions generated for top "
-                        f"{actual_top_n} candidates only._"
-                    )
+               
 
 
     # ── SUMMARY ─────────────────────────────────────────────────────────────
@@ -1307,9 +1336,26 @@ if analyze_clicked:
     ]
 
     if shortlisted_names:
-        st.success(
-            f"✅ Recommended to shortlist: "
-            f"{', '.join(shortlisted_names)}"
+        st.markdown(
+            f"""
+            <div style="
+            background-color:#E8F5E9;
+            color:#2E7D32;
+            padding:10px 16px;
+            border-radius:8px;
+            font-size:16px;
+            font-weight:700;
+            text-align:center;
+            ">
+            ✅ Recommended to shortlist: "
+            <span style="font-weight:700;">
+                {', '.join(shortlisted_names)}
+            </span>
+            </div>
+            """
+           
+            ,
+            unsafe_allow_html=True
         )
     else:
         st.info(
@@ -1317,10 +1363,6 @@ if analyze_clicked:
             "Try lowering it in the sidebar."
         )
 
-    total_llm_calls = 1 + actual_top_n
+    
 
-    st.caption(
-        f"⚡ Total Gemini LLM calls this run: **{total_llm_calls}** "
-        f"(1 JD extraction + {actual_top_n} suggestions). "
-        "Semantic embeddings and ATS scoring run locally."
-    )
+   
