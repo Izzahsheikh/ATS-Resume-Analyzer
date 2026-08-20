@@ -473,8 +473,107 @@ hr {
     -webkit-text-fill-color: #292529 !important;
     opacity: 1 !important;
 }
+
+/* =========================================================
+   NO SHORTLIST MESSAGE
+   ========================================================= */
+
+.custom-no-shortlist {
+    background-color: #FFF1EB !important;
+    border: 1px solid #F26B4F !important;
+    border-radius: 8px !important;
+
+    padding: 12px 16px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Icon */
+.custom-no-shortlist-icon {
+    color: #F26B4F !important;
+    -webkit-text-fill-color: #F26B4F !important;
+
+    font-size: 18px !important;
+    font-weight: 700 !important;
+}
+
+/* Text */
+.custom-no-shortlist-text {
+    color: #B94A32 !important;
+    -webkit-text-fill-color: #B94A32 !important;
+
+    font-size: 16px !important;
+    font-weight: 600 !important;
+
+    opacity: 1 !important;
+}
+/* =========================================================
+   DETAILS EXPANDER
+   ========================================================= */
+
+/* Normal state */
+[data-testid="stExpander"] summary {
+    background-color: #FFFFFF !important;
+    color: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+
+    font-size: 16px !important;
+    font-weight: 600 !important;
+
+    border-radius: 8px !important;
+}
+
+/* Normal text */
+[data-testid="stExpander"] summary p,
+[data-testid="stExpander"] summary span {
+    color: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+}
+
+
+/* =========================================================
+   OPEN STATE
+   ========================================================= */
+
+/* Only when expander is actually open */
+[data-testid="stExpander"] details[open] summary {
+    background-color: #541F49 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Text when open */
+[data-testid="stExpander"] details[open] summary p,
+[data-testid="stExpander"] details[open] summary span {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+/* Don't keep dark color just because it was clicked */
+[data-testid="stExpander"] summary:focus {
+    outline: none !important;
+}
+
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+[data-testid="stExpander"] summary:hover {
+    background-color: #F3F1F2 !important;
+    color: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+}
 </style>
 """, unsafe_allow_html=True)
+
 
 # --------------------------------------------------------------------------
 # HEADER
@@ -1207,7 +1306,7 @@ if analyze_clicked:
         st.error("No resumes could be scored.")
         st.stop()
         
-        # Remove progress bar completely after processing
+        
     progress.empty()
 
 
@@ -1273,7 +1372,7 @@ if analyze_clicked:
                       <div style="
                       background-color:#FDECEC;
                       color:#C62828;
-                      padding:10px 16px;
+                      padding:10px 17px;
                       border-radius:8px;
                      font-size:16px;
                       font-weight:700;
@@ -1343,11 +1442,11 @@ if analyze_clicked:
             color:#2E7D32;
             padding:10px 16px;
             border-radius:8px;
-            font-size:16px;
+            font-size:18px;
             font-weight:700;
             text-align:center;
             ">
-            ✅ Recommended to shortlist: "
+            ✅ Recommended to shortlist: 
             <span style="font-weight:700;">
                 {', '.join(shortlisted_names)}
             </span>
@@ -1358,10 +1457,19 @@ if analyze_clicked:
             unsafe_allow_html=True
         )
     else:
-        st.info(
-            "No candidates met the shortlist threshold. "
-            "Try lowering it in the sidebar."
+      st.markdown(
+         """
+          <div class="custom-no-shortlist">
+            <span class="custom-no-shortlist-icon">⚠</span>
+            <span class="custom-no-shortlist-text">
+                No candidates met the shortlist threshold.
+                Try lowering it in the sidebar.
+            </span>
+         </div>
+         """,
+          unsafe_allow_html=True
         )
+        
 
     
 
