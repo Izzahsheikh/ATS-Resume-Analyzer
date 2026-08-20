@@ -833,6 +833,10 @@ with jd_col:
 # --------------------------------------------------------------------------
 # CANDIDATE CVs  (STEP 2 / 2)
 # --------------------------------------------------------------------------
+# Read previous-cycle value from session state BEFORE the widget renders
+_prev_cvs = st.session_state.get("resume_upload", []) or []
+_has_cvs = len(_prev_cvs) > 0
+
 with cv_col:
     st.markdown(
         """
@@ -847,22 +851,22 @@ with cv_col:
         unsafe_allow_html=True
     )
 
-    if not resume_files:
+    if _has_cvs:
+        cv_count = len(_prev_cvs)
+        st.markdown(
+            f"<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>"
+            f"<b style='color:#292529;'>{cv_count} CV{'s' if cv_count != 1 else ''}</b> ready for analysis. "
+            f"Drag &amp; drop more files into the box below or click <b>＋ Add More CVs</b>.</p>",
+            unsafe_allow_html=True
+        )
+    else:
         st.markdown(
             "<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>Upload one or more candidate PDF resumes.<br>Drag &amp; drop directly into the box below, or click <b>Upload</b>.</p>",
             unsafe_allow_html=True
         )
-    else:
-        cv_count = len(resume_files)
-        st.markdown(
-            f"<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>"
-            f"<b style='color:#292529;'>{cv_count} CV{'s' if cv_count != 1 else ''}</b> ready for analysis. "
-            f"To add more, drag &amp; drop additional files into the box below or click <b>＋ Add More CVs</b>.</p>",
-            unsafe_allow_html=True
-        )
 
     resume_files = st.file_uploader(
-        "＋ Add More CVs" if resume_files else "Drop CVs here, or click Upload",
+        "＋ Add More CVs" if _has_cvs else "Drop CVs here, or click Upload",
         type=["pdf"],
         accept_multiple_files=True,
         key="resume_upload",
