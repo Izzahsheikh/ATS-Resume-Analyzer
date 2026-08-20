@@ -213,8 +213,16 @@ section[data-testid="stSidebar"] .stButton > button:active {
 }
 
 /* =========================================================
-   UPLOAD BUTTON
+   UPLOAD BUTTON (Browse / Upload)
    ========================================================= */
+
+/* Hide the native + (add more files) button Streamlit renders */
+[data-testid="stFileUploaderFileList"] ~ div button,
+[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] ~ div > button:last-child {
+    display: none !important;
+}
+
+/* Style all uploader buttons (Upload / Browse) */
 [data-testid="stFileUploader"] button {
     background-color: #6B3A5E !important;
     border: 1px solid #6B3A5E !important;
@@ -222,7 +230,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
     min-height: 42px !important;
     padding: 0 18px !important;
     color: #FFFFFF !important;
-    font-size: 19px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
 }
 
@@ -236,6 +244,42 @@ section[data-testid="stSidebar"] .stButton > button:active {
     border-color: #6B3A5E !important;
     color: #FFFFFF !important;
     box-shadow: none !important;
+}
+
+/* Style the small × delete button on uploaded file chips */
+[data-testid="stFileUploaderDeleteBtn"] button {
+    background-color: transparent !important;
+    border: none !important;
+    min-height: unset !important;
+    padding: 2px !important;
+    color: #541F49 !important;
+    font-size: 13px !important;
+}
+
+/* ADD MORE CVs custom button */
+.add-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #6B3A5E;
+    border: 1.5px solid #6B3A5E;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #FFFFFF;
+    cursor: pointer;
+    margin-top: 12px;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.add-more-btn:hover {
+    background-color: #541F49;
+    border-color: #541F49;
 }
 
 /* =========================================================
