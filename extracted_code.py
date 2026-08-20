@@ -18,7 +18,7 @@ from langchain_core.prompts import PromptTemplate
 
 load_dotenv()
 
-## --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # PAGE CONFIG
 # --------------------------------------------------------------------------
 st.set_page_config(
@@ -37,7 +37,6 @@ st.markdown("""
 /* =========================================================
    GLOBAL
    ========================================================= */
-
 .stApp {
     background-color: #F7F6F4;
 }
@@ -47,380 +46,294 @@ st.markdown("""
     padding-bottom: 3rem;
 }
 
-
 /* =========================================================
    SIDEBAR
    ========================================================= */
-
 section[data-testid="stSidebar"] {
     background-color: #EFEEEC !important;
     border-right: 1px solid #DDD9D7;
 }
 
-/* Sidebar headings */
 section[data-testid="stSidebar"] h1,
 section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {
     color: #541F49 !important;
 }
 
-/* Sidebar normal text */
 section[data-testid="stSidebar"] p {
     color: #292529 !important;
 }
 
-/* Sidebar descriptions */
 section[data-testid="stSidebar"] .stMarkdown p {
     color: #6F6A6D !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     line-height: 1.5 !important;
 }
-
 
 /* =========================================================
    MAIN HEADINGS
    ========================================================= */
-
-h1 {
-    color: #541F49 !important;
-    font-size: 32px !important;
-    font-weight: 700 !important;
-}
-
-h2 {
-    color: #541F49 !important;
-    font-size: 22px !important;
-    font-weight: 650 !important;
-}
-
-h3 {
-    color: #292529 !important;
-    font-size: 18px !important;
-    font-weight: 600 !important;
-}
-
+h1 { color: #541F49 !important; font-size: 32px !important; font-weight: 700 !important; }
+h2 { color: #541F49 !important; font-size: 22px !important; font-weight: 650 !important; }
+h3 { color: #292529 !important; font-size: 18px !important; font-weight: 600 !important; }
 
 /* =========================================================
    THRESHOLD VALUE BOX
    ========================================================= */
-
-/* Outer text input container */
-section[data-testid="stSidebar"]
-div[data-testid="stTextInput"] > div {
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] > div {
     background-color: #FFFFFF !important;
     border-radius: 7px !important;
 }
 
-/* Actual value input */
-section[data-testid="stSidebar"]
-div[data-testid="stTextInput"] input {
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input {
     background-color: #FFFFFF !important;
     color: #292529 !important;
     -webkit-text-fill-color: #292529 !important;
-
     text-align: center !important;
-
     font-size: 18px !important;
     font-weight: 600 !important;
-
     border: 1px solid #D8D4D1 !important;
     border-radius: 7px !important;
-
     color-scheme: light !important;
 }
 
-/* Focus */
-section[data-testid="stSidebar"]
-div[data-testid="stTextInput"] input:focus {
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
     background-color: #FFFFFF !important;
     color: #292529 !important;
     -webkit-text-fill-color: #292529 !important;
-
     border-color: #541F49 !important;
     box-shadow: 0 0 0 1px #541F49 !important;
 }
 
-
 /* =========================================================
    THRESHOLD MINUS / PLUS BUTTONS
    ========================================================= */
-
-section[data-testid="stSidebar"]
-.stButton > button {
+section[data-testid="stSidebar"] .stButton > button {
     min-height: 40px !important;
     padding: 0 !important;
-
     background-color: #541F49 !important;
     border: 1px solid #541F49 !important;
     border-radius: 7px !important;
-
     color: #FFFFFF !important;
-
     font-size: 22px !important;
     font-weight: 600 !important;
 }
 
-/* Button text */
-section[data-testid="stSidebar"]
-.stButton > button p,
-section[data-testid="stSidebar"]
-.stButton > button span {
+section[data-testid="stSidebar"] .stButton > button p,
+section[data-testid="stSidebar"] .stButton > button span {
     color: #FFFFFF !important;
 }
 
-/* Hover */
-section[data-testid="stSidebar"]
-.stButton > button:hover {
+section[data-testid="stSidebar"] .stButton > button:hover {
     background-color: #6B3A5E !important;
     border-color: #6B3A5E !important;
     color: #FFFFFF !important;
 }
 
-/* After click */
-section[data-testid="stSidebar"]
-.stButton > button:focus,
-section[data-testid="stSidebar"]
-.stButton > button:focus-visible,
-section[data-testid="stSidebar"]
-.stButton > button:active {
+section[data-testid="stSidebar"] .stButton > button:focus,
+section[data-testid="stSidebar"] .stButton > button:focus-visible,
+section[data-testid="stSidebar"] .stButton > button:active {
     background-color: #541F49 !important;
     border-color: #541F49 !important;
     color: #FFFFFF !important;
-
     box-shadow: none !important;
 }
-
 
 /* =========================================================
    MAIN BUTTONS
    ========================================================= */
-
 .stButton > button {
     background-color: #6B3A5E !important;
     border: 1px solid #6B3A5E !important;
     border-radius: 8px !important;
-
     min-height: 48px !important;
     padding: 0 24px !important;
-
     color: #FFFFFF !important;
-
     font-size: 19px !important;
     font-weight: 600 !important;
-
-    transition:
-        background-color 0.15s ease,
-        border-color 0.15s ease !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
 }
 
-.stButton > button p,
-.stButton > button span {
-    color: #FFFFFF !important;
-}
-
-.stButton > button:hover {
-    background-color: #541F49 !important;
-    border-color: #541F49 !important;
-}
-
-.stButton > button:focus,
-.stButton > button:focus-visible,
-.stButton > button:active {
+.stButton > button p, .stButton > button span { color: #FFFFFF !important; }
+.stButton > button:hover { background-color: #541F49 !important; border-color: #541F49 !important; }
+.stButton > button:focus, .stButton > button:focus-visible, .stButton > button:active {
     background-color: #6B3A5E !important;
     border-color: #6B3A5E !important;
     color: #FFFFFF !important;
-
     box-shadow: none !important;
 }
-
 
 /* =========================================================
    FILE UPLOADER
    ========================================================= */
-
 [data-testid="stFileUploader"] {
     background-color: #F0EFEC !important;
-
     border: 1px solid #D8D4D1 !important;
-    border-radius: 8px !important;
-
-    padding: 4px !important;
+    border-radius: 10px !important;
+    padding: 6px !important;
+    margin-top: 4px !important;
 }
 
-/* Dropzone */
 [data-testid="stFileUploaderDropzone"] {
     background-color: #F0EFEC !important;
-
-    border: 1px dashed #C8C3C0 !important;
-    border-radius: 7px !important;
+    border: 2px dashed #C0B4BE !important;
+    border-radius: 8px !important;
+    padding: 20px 16px !important;
 }
 
-/* Upload label */
+/* Dropzone instruction text */
+[data-testid="stFileUploaderDropzoneInstructions"] {
+    font-size: 15px !important;
+    color: #6F6A6D !important;
+}
+
+[data-testid="stFileUploaderDropzoneInstructions"] span {
+    font-size: 15px !important;
+    color: #6F6A6D !important;
+}
+
+/* Drag active state */
+[data-testid="stFileUploaderDropzone"]:hover,
+[data-testid="stFileUploaderDropzone"][data-dragging="true"] {
+    border-color: #541F49 !important;
+    background-color: #EDE0EC !important;
+}
+
 [data-testid="stFileUploader"] label {
     color: #292529 !important;
-    font-size: 19px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 1.5 !important;
 }
 
-/* Helper text */
 [data-testid="stFileUploader"] small {
     color: #6F6A6D !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
 }
-.upload-card-title {
-    color: #292529 !important;
-    font-size: 18px !important;
-    font-weight: 600 !important;
-}
-
 
 /* =========================================================
    UPLOAD BUTTON
    ========================================================= */
-
 [data-testid="stFileUploader"] button {
     background-color: #6B3A5E !important;
-
     border: 1px solid #6B3A5E !important;
     border-radius: 7px !important;
-
     min-height: 42px !important;
-
     padding: 0 18px !important;
-
     color: #FFFFFF !important;
-
     font-size: 19px !important;
     font-weight: 600 !important;
 }
 
-/* Upload button text */
 [data-testid="stFileUploader"] button span,
-[data-testid="stFileUploader"] button p {
-    color: #FFFFFF !important;
-}
-
-/* Upload hover */
-[data-testid="stFileUploader"] button:hover {
-    background-color: #541F49 !important;
-    border-color: #541F49 !important;
-}
-
-/* Upload focus/click */
+[data-testid="stFileUploader"] button p { color: #FFFFFF !important; }
+[data-testid="stFileUploader"] button:hover { background-color: #541F49 !important; border-color: #541F49 !important; }
 [data-testid="stFileUploader"] button:focus,
 [data-testid="stFileUploader"] button:focus-visible,
 [data-testid="stFileUploader"] button:active {
     background-color: #6B3A5E !important;
     border-color: #6B3A5E !important;
-
     color: #FFFFFF !important;
-
     box-shadow: none !important;
 }
-
 
 /* =========================================================
    METRICS
    ========================================================= */
-
 [data-testid="stMetricValue"] {
     color: #541F49 !important;
-
     font-size: 28px !important;
     font-weight: 700 !important;
 }
 
 [data-testid="stMetricLabel"] {
     color: #6F6A6D !important;
-    font-size: 19px !important;
+    font-size: 16px !important;
 }
-
 
 /* =========================================================
    EXPANDERS / CARDS
    ========================================================= */
-
 [data-testid="stExpander"] {
     background-color: #FFFFFF !important;
-
     border: 1px solid #DDD9D7 !important;
     border-radius: 8px !important;
 }
 
 [data-testid="stExpander"] summary {
-    font-size: 19px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
+    background-color: #FFFFFF !important;
+    color: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+    border-radius: 8px !important;
 }
 
+[data-testid="stExpander"] summary p,
+[data-testid="stExpander"] summary span {
+    color: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+}
+
+[data-testid="stExpander"] details[open] summary {
+    background-color: #541F49 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+[data-testid="stExpander"] details[open] summary p,
+[data-testid="stExpander"] details[open] summary span {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+[data-testid="stExpander"] summary:focus { outline: none !important; }
+[data-testid="stExpander"] summary:hover {
+    background-color: #F3F1F2 !important;
+    color: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+}
 
 /* =========================================================
    DIVIDERS
    ========================================================= */
-
-hr {
-    border-color: #DDD9D7 !important;
-}
-
+hr { border-color: #DDD9D7 !important; }
 
 /* =========================================================
    CAPTIONS
    ========================================================= */
-
 [data-testid="stCaptionContainer"] {
     color: #6F6A6D !important;
-    font-size: 19px !important;
+    font-size: 15px !important;
 }
-
 
 /* =========================================================
    ALERTS
    ========================================================= */
-
 [data-testid="stAlert"] {
     border-radius: 8px !important;
-    font-size: 19px !important;
+    font-size: 16px !important;
 }
-
 
 /* =========================================================
    GENERAL MARKDOWN
    ========================================================= */
-
-.stMarkdown {
-    font-size: 19px;
-}
-
+.stMarkdown { font-size: 16px; }
 
 /* =========================================================
    SCROLLBAR
    ========================================================= */
-
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #F7F6F4;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #C8C3C0;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #A9A2A5;
-}
-
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #F7F6F4; }
+::-webkit-scrollbar-thumb { background: #C8C3C0; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #A9A2A5; }
 
 /* =========================================================
    RESULT CARD TEXT
    ========================================================= */
+[data-testid="stVerticalBlockBorderWrapper"] { background-color: #FFFFFF !important; }
 
-[data-testid="stVerticalBlockBorderWrapper"] {
-    background-color: #FFFFFF !important;
-}
-
-/* Candidate name + normal text */
 [data-testid="stVerticalBlockBorderWrapper"] p,
 [data-testid="stVerticalBlockBorderWrapper"] span,
 [data-testid="stVerticalBlockBorderWrapper"] h3 {
@@ -428,46 +341,23 @@ hr {
     -webkit-text-fill-color: #292529 !important;
 }
 
-/* HTML text inside result cards */
 [data-testid="stVerticalBlockBorderWrapper"] .stMarkdown div {
     color: #292529 !important;
     -webkit-text-fill-color: #292529 !important;
 }
 
-
-/* =========================================================
-   DETAILS / EXPANDER
-   ========================================================= */
-
-[data-testid="stExpander"] {
-    background-color: #FFFFFF !important;
-}
-
 [data-testid="stExpander"] p,
 [data-testid="stExpander"] span,
-[data-testid="stExpander"] li {
-    color: #292529 !important;
-}
+[data-testid="stExpander"] li { color: #292529 !important; }
 
-/* Matched / Missing headings */
-[data-testid="stExpander"] strong {
-    color: #292529 !important;
-}
-
+[data-testid="stExpander"] strong { color: #292529 !important; }
 
 /* =========================================================
    PROGRESS TEXT
    ========================================================= */
+[data-testid="stProgress"] p { color: #292529 !important; }
+[data-testid="stProgress"] span { color: #292529 !important; }
 
-[data-testid="stProgress"] p {
-    color: #292529 !important;
-}
-
-[data-testid="stProgress"] span {
-    color: #292529 !important;
-}
-
-/* Candidate name in ranking card */
 [data-testid="stVerticalBlockBorderWrapper"] [data-testid="stMarkdownContainer"] h3 {
     color: #292529 !important;
     -webkit-text-fill-color: #292529 !important;
@@ -475,102 +365,140 @@ hr {
 }
 
 /* =========================================================
+   STEP LABELS
+   ========================================================= */
+.step-label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #541F49;
+    background-color: #EDE0EC;
+    border: 1.5px solid #C9A8C4;
+    border-radius: 5px;
+    padding: 5px 14px;
+    margin-bottom: 12px;
+}
+
+/* =========================================================
+   UPLOAD CARD
+   ========================================================= */
+.upload-card {
+    background: #FFFFFF;
+    border: 1.5px solid #DDD9D7;
+    border-radius: 12px;
+    padding: 24px 24px 20px 24px;
+    height: 100%;
+}
+
+.upload-card-heading {
+    font-size: 18px;
+    font-weight: 700;
+    color: #292529;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-card-sub {
+    font-size: 13px;
+    color: #6F6A6D;
+    margin: 0 0 16px 0;
+}
+
+/* =========================================================
    NO SHORTLIST MESSAGE
    ========================================================= */
-
 .custom-no-shortlist {
     background-color: #FFF1EB !important;
     border: 1px solid #F26B4F !important;
     border-radius: 8px !important;
-
     padding: 12px 16px !important;
-
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
 }
 
-/* Icon */
 .custom-no-shortlist-icon {
     color: #F26B4F !important;
     -webkit-text-fill-color: #F26B4F !important;
-
     font-size: 18px !important;
     font-weight: 700 !important;
 }
 
-/* Text */
 .custom-no-shortlist-text {
     color: #B94A32 !important;
     -webkit-text-fill-color: #B94A32 !important;
-
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
-
     opacity: 1 !important;
 }
-/* =========================================================
-   DETAILS EXPANDER
-   ========================================================= */
-
-/* Normal state */
-[data-testid="stExpander"] summary {
-    background-color: #FFFFFF !important;
-    color: #541F49 !important;
-    -webkit-text-fill-color: #541F49 !important;
-
-    font-size: 16px !important;
-    font-weight: 600 !important;
-
-    border-radius: 8px !important;
-}
-
-/* Normal text */
-[data-testid="stExpander"] summary p,
-[data-testid="stExpander"] summary span {
-    color: #541F49 !important;
-    -webkit-text-fill-color: #541F49 !important;
-}
-
 
 /* =========================================================
-   OPEN STATE
+   RECOMMENDATION SECTION
    ========================================================= */
-
-/* Only when expander is actually open */
-[data-testid="stExpander"] details[open] summary {
-    background-color: #541F49 !important;
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
+.rec-section {
+    background: #FFFFFF;
+    border: 1.5px solid #D4B8D0;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
 }
 
-/* Text when open */
-[data-testid="stExpander"] details[open] summary p,
-[data-testid="stExpander"] details[open] summary span {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
+.rec-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #541F49;
+    margin-bottom: 4px;
 }
 
-
-/* =========================================================
-   FOCUS
-   ========================================================= */
-
-/* Don't keep dark color just because it was clicked */
-[data-testid="stExpander"] summary:focus {
-    outline: none !important;
+.rec-heading {
+    font-size: 22px;
+    font-weight: 700;
+    color: #292529;
+    margin: 0 0 6px 0;
 }
 
-
-/* =========================================================
-   HOVER
-   ========================================================= */
-
-[data-testid="stExpander"] summary:hover {
-    background-color: #F3F1F2 !important;
-    color: #541F49 !important;
-    -webkit-text-fill-color: #541F49 !important;
+.rec-subtext {
+    font-size: 14px;
+    color: #6F6A6D;
+    margin: 0 0 18px 0;
 }
+
+.rec-candidate-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.rec-candidate-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #F0E8EF;
+    border: 1px solid #D4B8D0;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #541F49;
+}
+
+.rec-none {
+    background: #FFF1EB;
+    border: 1px solid #F26B4F;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #B94A32;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -589,7 +517,7 @@ with title_col:
         unsafe_allow_html=True
     )
     st.markdown(
-        "<p style='color:#6F6A6D; font-size:18px; margin-top:4px;'>"
+        "<p style='color:#6F6A6D; font-size:16px; margin-top:4px;'>"
         "Find the right candidates faster with AI-powered screening."
         "</p>",
         unsafe_allow_html=True
@@ -651,7 +579,7 @@ def get_llm():
 
 
 # --------------------------------------------------------------------------
-# STEP 1: Extract required skills from JD — cached by content hash
+# STEP 1: Extract required skills from JD
 # --------------------------------------------------------------------------
 JD_SKILLS_PROMPT = PromptTemplate(
     input_variables=["job_description"],
@@ -675,30 +603,23 @@ Do NOT include soft skills like "communication" or "teamwork".
 
 @st.cache_data(show_spinner=False)
 def extract_jd_skills(jd_text: str) -> list:
-    """Cached by JD content — only runs once per unique JD."""
     prompt = JD_SKILLS_PROMPT.format(job_description=jd_text)
     response = get_llm().invoke(prompt)
     data = parse_json_response(response.content)
     return [s.lower() for s in data.get("required_skills", [])]
+
+
 @st.cache_resource
 def get_embedding_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
 
+
 # --------------------------------------------------------------------------
 # STEP 2: Semantic Embeddings
 # --------------------------------------------------------------------------
-
 @st.cache_data(show_spinner=False)
 def generate_embeddings(texts: tuple) -> np.ndarray:
-    """
-    Generate local embeddings for multiple texts.
-
-    Embeddings are generated locally.
-    No Gemini embedding API call is made.
-    """
-
     model = get_embedding_model()
-
     embeddings = model.encode(
         list(texts),
         batch_size=32,
@@ -706,216 +627,92 @@ def generate_embeddings(texts: tuple) -> np.ndarray:
         normalize_embeddings=True,
         show_progress_bar=False
     )
-
     return embeddings
 
 
-def cosine_similarity_score(a, b):
-    """
-    Calculate cosine similarity between two normalized vectors.
-    """
-
-    return float(np.dot(a, b))
-
-
-def compute_semantic_similarity(
-    jd_embedding: np.ndarray,
-    resume_embeddings: np.ndarray
-) -> list:
-    """
-    Calculate JD ↔ Resume semantic similarity locally.
-    """
-
-    similarities = np.dot(
-        resume_embeddings,
-        jd_embedding
-    )
-
-    return [
-        round(float(score) * 100)
-        for score in similarities
-    ]
+def compute_semantic_similarity(jd_embedding, resume_embeddings):
+    similarities = np.dot(resume_embeddings, jd_embedding)
+    return [round(float(score) * 100) for score in similarities]
 
 
 # --------------------------------------------------------------------------
-# STEP 3: Deterministic scoring (no LLM)
+# STEP 3: Deterministic scoring
 # --------------------------------------------------------------------------
-
-def compute_skill_match(
-    resume_text: str,
-    required_skills: list
-) -> tuple:
-
+def compute_skill_match(resume_text, required_skills):
     if not required_skills:
         return 0, [], []
 
-    # Resume ko lines mein divide karo
-    chunks = [
-        line.strip()
-        for line in resume_text.splitlines()
-        if len(line.strip()) >= 15
-    ]
-
+    chunks = [line.strip() for line in resume_text.splitlines() if len(line.strip()) >= 15]
     if not chunks:
         return 0, [], []
 
-    # Local embedding model
     model = get_embedding_model()
+    skill_embeddings = model.encode(required_skills, batch_size=32, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False)
+    chunk_embeddings = model.encode(chunks, batch_size=32, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False)
 
-    # Required skills embeddings
-    skill_embeddings = model.encode(
-        required_skills,
-        batch_size=32,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False
-    )
-
-    # Resume chunks embeddings
-    chunk_embeddings = model.encode(
-        chunks,
-        batch_size=32,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False
-    )
-
-    # Each skill vs every resume chunk
-    similarities = np.dot(
-        skill_embeddings,
-        chunk_embeddings.T
-    )
-
-    matched = []
-    missing = []
-
+    similarities = np.dot(skill_embeddings, chunk_embeddings.T)
+    matched, missing = [], []
     MATCH_THRESHOLD = 0.50
 
-    for skill, skill_similarities in zip(
-        required_skills,
-        similarities
-    ):
-
-        best_similarity = float(
-            np.max(skill_similarities)
-        )
-
-        print(
-            f"{skill}: {best_similarity:.4f}"
-        )
-
-        if best_similarity >= MATCH_THRESHOLD:
+    for skill, skill_sims in zip(required_skills, similarities):
+        if float(np.max(skill_sims)) >= MATCH_THRESHOLD:
             matched.append(skill)
         else:
             missing.append(skill)
 
-    score = round(
-        len(matched) /
-        len(required_skills) *
-        100
-    )
-
-    print("\n--- SKILL MATCH DEBUG ---")
-    print("Required skills:", required_skills)
-    print("Matched:", matched)
-    print("Missing:", missing)
-    print("Skill Score:", score)
-
+    score = round(len(matched) / len(required_skills) * 100)
     return score, matched, missing
 
 
-def score_education(resume_text: str) -> int:
+def score_education(resume_text):
     text = resume_text.lower()
-    if any(w in text for w in ["phd", "doctorate"]):
-        return 100
-    elif any(w in text for w in ["master", "msc", "ms ", "m.s", "mba"]):
-        return 85
-    elif any(w in text for w in ["bachelor", "bsc", "b.s", "b.e", "beng", "degree"]):
-        return 70
-    elif any(w in text for w in ["diploma", "associate"]):
-        return 50
+    if any(w in text for w in ["phd", "doctorate"]): return 100
+    elif any(w in text for w in ["master", "msc", "ms ", "m.s", "mba"]): return 85
+    elif any(w in text for w in ["bachelor", "bsc", "b.s", "b.e", "beng", "degree"]): return 70
+    elif any(w in text for w in ["diploma", "associate"]): return 50
     return 30
 
 
-def score_experience(resume_text: str, jd_text: str) -> int:
+def score_experience(resume_text, jd_text):
     resume_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", resume_text.lower())
     jd_years = re.findall(r"(\d+)\+?\s*years?\s*(?:of\s*)?(?:experience|exp)", jd_text.lower())
     if resume_years and jd_years:
         candidate_exp = max(int(y) for y in resume_years)
         required_exp = max(int(y) for y in jd_years)
-        if candidate_exp >= required_exp:
-            return 100
+        if candidate_exp >= required_exp: return 100
         return round((candidate_exp / required_exp) * 100)
     text = resume_text.lower()
-    if any(w in text for w in ["senior", "lead", "principal", "head of", "manager"]):
-        return 85
-    elif any(w in text for w in ["engineer", "developer", "analyst", "apprentice"]):
-        return 65
-    elif any(w in text for w in ["junior", "intern", "trainee", "fresher", "graduate"]):
-        return 40
+    if any(w in text for w in ["senior", "lead", "principal", "head of", "manager"]): return 85
+    elif any(w in text for w in ["engineer", "developer", "analyst", "apprentice"]): return 65
+    elif any(w in text for w in ["junior", "intern", "trainee", "fresher", "graduate"]): return 40
     return 50
 
 
-def score_projects(resume_text: str) -> int:
+def score_projects(resume_text):
     text = resume_text.lower()
     score = 0
-    if "project" in text:
-        score += 50
-    if any(w in text for w in ["github", "gitlab", "bitbucket"]):
-        score += 25
-    if any(w in text for w in ["deployed", "production", "live", "published"]):
-        score += 25
+    if "project" in text: score += 50
+    if any(w in text for w in ["github", "gitlab", "bitbucket"]): score += 25
+    if any(w in text for w in ["deployed", "production", "live", "published"]): score += 25
     return score
 
 
-def score_formatting(resume_text: str) -> int:
+def score_formatting(resume_text):
     lines = [l.strip() for l in resume_text.splitlines() if l.strip()]
     score = 50
-    if len(lines) > 20:
-        score += 15
-    if any(w in resume_text.lower() for w in ["experience", "education", "skills", "projects"]):
-        score += 20
-    if any(w in resume_text.lower() for w in ["@", "email", "phone", "linkedin"]):
-        score += 15
+    if len(lines) > 20: score += 15
+    if any(w in resume_text.lower() for w in ["experience", "education", "skills", "projects"]): score += 20
+    if any(w in resume_text.lower() for w in ["@", "email", "phone", "linkedin"]): score += 15
     return min(score, 100)
 
 
-def score_resume_deterministic(
-    resume_text: str,
-    jd_text: str,
-    required_skills: list,
-    semantic_score: int,
-    resume_embedding: np.ndarray,
-    skill_embeddings: np.ndarray,
-) -> dict:
-
-    skill_score, matched, missing = compute_skill_match(
-        resume_text,
-        required_skills
-    )
-
-    combined_skill = round(
-        skill_score * 0.7 +
-        semantic_score * 0.3
-    )
-
-    experience_score = score_experience(
-        resume_text,
-        jd_text
-    )
-
-    education_score = score_education(
-        resume_text
-    )
-
-    projects_score = score_projects(
-        resume_text
-    )
-
-    formatting_score = score_formatting(
-        resume_text
-    )
-
+def score_resume_deterministic(resume_text, jd_text, required_skills, semantic_score, resume_embedding, skill_embeddings):
+    skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
+    combined_skill = round(skill_score * 0.7 + semantic_score * 0.3)
+    experience_score = score_experience(resume_text, jd_text)
+    education_score = score_education(resume_text)
+    projects_score = score_projects(resume_text)
+    formatting_score = score_formatting(resume_text)
     ats_score = round(
         combined_skill   * 0.40 +
         experience_score * 0.25 +
@@ -923,7 +720,6 @@ def score_resume_deterministic(
         projects_score   * 0.12 +
         formatting_score * 0.08
     )
-
     return {
         "ats_score": ats_score,
         "final_score": ats_score,
@@ -934,10 +730,7 @@ def score_resume_deterministic(
         "formatting_score": formatting_score,
         "matched_skills": [s.title() for s in matched],
         "missing_skills": [s.title() for s in missing],
-        
     }
-
-
 
 
 # --------------------------------------------------------------------------
@@ -946,23 +739,17 @@ def score_resume_deterministic(
 if "shortlist_threshold" not in st.session_state:
     st.session_state.shortlist_threshold = 70
 if "threshold_text" not in st.session_state:
-    st.session_state.threshold_text = "70"  
-def decrease_threshold():
-    new_value = max(
-        0,
-        st.session_state.shortlist_threshold - 1
-    )
+    st.session_state.threshold_text = "70"
 
+
+def decrease_threshold():
+    new_value = max(0, st.session_state.shortlist_threshold - 1)
     st.session_state.shortlist_threshold = new_value
     st.session_state.threshold_text = str(new_value)
 
 
 def increase_threshold():
-    new_value = min(
-        100,
-        st.session_state.shortlist_threshold + 1
-    )
-
+    new_value = min(100, st.session_state.shortlist_threshold + 1)
     st.session_state.shortlist_threshold = new_value
     st.session_state.threshold_text = str(new_value)
 
@@ -970,174 +757,122 @@ def increase_threshold():
 def update_threshold():
     try:
         value = int(st.session_state.threshold_text)
-
         if 0 <= value <= 100:
             st.session_state.shortlist_threshold = value
         else:
-            st.session_state.threshold_text = str(
-                st.session_state.shortlist_threshold
-            )
-
+            st.session_state.threshold_text = str(st.session_state.shortlist_threshold)
     except ValueError:
-        st.session_state.threshold_text = str(
-            st.session_state.shortlist_threshold
-        )        
+        st.session_state.threshold_text = str(st.session_state.shortlist_threshold)
+
+
 with st.sidebar:
-
-    st.markdown(
-        "<h2 style='margin-bottom:5px;'>Screening Settings</h2>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "<p style='color:#6F6A6D; font-size:15px;'>"
-        "Configure how candidates are evaluated."
-        "</p>",
-        unsafe_allow_html=True
-    )
-
+    st.markdown("<h2 style='margin-bottom:5px;'>Screening Settings</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6F6A6D; font-size:14px;'>Configure how candidates are evaluated.</p>", unsafe_allow_html=True)
     st.markdown("---")
 
+    st.markdown("<p style='font-weight:600; color:#292529; font-size:15px; margin-bottom:8px;'>Shortlist Threshold</p>", unsafe_allow_html=True)
 
-    # Shortlist threshold
-    st.markdown(
-    "<p style='font-weight:600; color:#292529; margin-bottom:8px;'>"
-    "Shortlist Threshold"
-    "</p>",
-    unsafe_allow_html=True
- )
+    minus_col, value_col, plus_col = st.columns([1, 1.5, 1])
 
-    minus_col, value_col, plus_col = st.columns(
-    [1, 1.5, 1] 
- )
-
-
- # MINUS
     with minus_col:
+        st.button("−", key="threshold_minus", use_container_width=True, on_click=decrease_threshold)
 
-     st.button(
-        "−",
-        key="threshold_minus",
-        use_container_width=True,
-        on_click=decrease_threshold
-    )
-
-
- # VALUE
     with value_col:
+        st.text_input("Threshold", key="threshold_text", label_visibility="collapsed", on_change=update_threshold)
 
-     st.text_input(
-        "Threshold",
-        key="threshold_text",
-        label_visibility="collapsed",
-        on_change=update_threshold
-    )
-
-
- # PLUS
     with plus_col:
+        st.button("＋", key="threshold_plus", use_container_width=True, on_click=increase_threshold)
 
-     st.button(
-        "＋",
-        key="threshold_plus",
-        use_container_width=True,
-        on_click=increase_threshold
-    )
-
-
- # Value used by backend
-     shortlist_threshold = st.session_state.shortlist_threshold
-
+    shortlist_threshold = st.session_state.shortlist_threshold
 
     st.markdown(
-    f"""
-    <p style='color:#6F6A6D; font-size:14px; margin-top:8px;'>
-        Candidates scoring <b>{shortlist_threshold}%</b> or higher
-        will be shortlisted.
-    </p>
-    """,
-    unsafe_allow_html=True
-)
-
-
+        f"<p style='color:#6F6A6D; font-size:13px; margin-top:8px;'>"
+        f"Candidates scoring <b>{shortlist_threshold}%</b> or higher will be shortlisted.</p>",
+        unsafe_allow_html=True
+    )
     st.markdown("---")
 
 
-
-
-
 # --------------------------------------------------------------------------
-# UPLOAD SECTION
+# UPLOAD SECTION HEADING
 # --------------------------------------------------------------------------
-
-st.markdown(
-    "<h2 style='margin-top:20px;'>Start Screening</h2>",
-    unsafe_allow_html=True
-)
+st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Start Screening</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>Complete both steps below, then click <b>Analyze Candidates</b>.</p>", unsafe_allow_html=True)
 
 jd_col, cv_col = st.columns(2, gap="large")
 
 # --------------------------------------------------------------------------
-# JOB DESCRIPTION
+# JOB DESCRIPTION  (STEP 1 / 2)
 # --------------------------------------------------------------------------
-
 with jd_col:
-
     st.markdown(
         """
-        <div class="upload-card-title">
-            📋 Job Description
+        <div style="margin-bottom: 10px;">
+            <span class="step-label">STEP 1 / 2</span>
         </div>
         """,
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:20px; font-weight:700; color:#292529; margin:0 0 8px 0; line-height:1.4;'>📋 Job Description</p>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>Upload a single JD file — PDF, DOCX, or TXT.<br>Drag &amp; drop directly into the box below, or click <b>Upload</b>.</p>",
         unsafe_allow_html=True
     )
 
     jd_file = st.file_uploader(
-        "Upload Job Description",
+        "Drop your Job Description here, or click Upload",
         type=["pdf", "txt", "docx"],
         key="jd_upload",
-        help="Upload a PDF, TXT or DOCX job description."
-    )
-
-    st.markdown(
-        "<div class='or-divider'><span>OR</span></div>",
-        unsafe_allow_html=True
+        help="One job description is enough."
     )
 
 
-
 # --------------------------------------------------------------------------
-# CANDIDATE CVs
+# CANDIDATE CVs  (STEP 2 / 2)
 # --------------------------------------------------------------------------
-
 with cv_col:
-
     st.markdown(
         """
-        <div class="upload-card-title">
-            👥 Candidate CVs
+        <div style="margin-bottom: 10px;">
+            <span class="step-label">STEP 2 / 2</span>
         </div>
         """,
         unsafe_allow_html=True
     )
+    st.markdown(
+        "<p style='font-size:20px; font-weight:700; color:#292529; margin:0 0 8px 0; line-height:1.4;'>👥 Candidate CVs</p>",
+        unsafe_allow_html=True
+    )
+
+    if not resume_files:
+        st.markdown(
+            "<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>Upload one or more candidate PDF resumes.<br>Drag &amp; drop directly into the box below, or click <b>Upload</b>.</p>",
+            unsafe_allow_html=True
+        )
+    else:
+        cv_count = len(resume_files)
+        st.markdown(
+            f"<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>"
+            f"<b style='color:#292529;'>{cv_count} CV{'s' if cv_count != 1 else ''}</b> ready for analysis. "
+            f"To add more, drag &amp; drop additional files into the box below or click <b>＋ Add More CVs</b>.</p>",
+            unsafe_allow_html=True
+        )
 
     resume_files = st.file_uploader(
-        "Upload Candidate CVs",
+        "＋ Add More CVs" if resume_files else "Drop CVs here, or click Upload",
         type=["pdf"],
         accept_multiple_files=True,
         key="resume_upload",
-        help="Select multiple candidate resumes."
+        help="Select multiple candidate resumes. You can keep adding more."
     )
 
-    st.markdown(
-        "<p class='upload-helper'>"
-        "Upload multiple PDF resumes at once."
-        "</p>",
-        unsafe_allow_html=True
-    )
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-
+# --------------------------------------------------------------------------
+# ANALYZE BUTTON
+# --------------------------------------------------------------------------
+st.markdown("<br>", unsafe_allow_html=True)
 button_col1, button_col2, button_col3 = st.columns([1.5, 2, 1.5])
 
 with button_col2:
@@ -1153,31 +888,25 @@ with button_col2:
 # --------------------------------------------------------------------------
 if analyze_clicked:
     if not jd_file:
-        st.error("Please upload a job description.")
+        st.error("⚠️ Step 1 is incomplete — please upload a Job Description before analyzing candidates.")
         st.stop()
     if not resume_files:
-        st.error("Please upload at least one resume.")
+        st.error("⚠️ Step 2 is incomplete — please add at least one Candidate CV.")
         st.stop()
 
-    # ── JD processing ───────────────────────────────────────────────────────
+    # ── JD processing ─────────────────────────────────────────────────────
     with st.spinner("Reading job description..."):
-
-     if jd_file:
         jd_text = extract_text_from_uploaded(jd_file)
-    
-     if not jd_text.strip():
+
+    if not jd_text.strip():
         st.error("Couldn't extract text from the job description.")
         st.stop()
 
     with st.spinner("Extracting required skills from job description..."):
         required_skills = extract_jd_skills(jd_text)
-    st.info(f"📋 **Required skills identified:** {', '.join(s.title() for s in required_skills)}")
 
-    
-
-    # ── PHASE 1: Parallel PDF extraction ────────────────────────────────────
+    # ── PHASE 1: Parallel PDF extraction ──────────────────────────────────
     progress = st.progress(0.0, text="Extracting resume text in parallel...")
-
     resume_texts: dict = {}
     failed: list = []
 
@@ -1207,60 +936,25 @@ if analyze_clicked:
         st.error("No resumes could be read.")
         st.stop()
 
-      # ── PHASE 2: Local Semantic Embeddings ────────────────────────────────
-    progress.progress(
-        0.35,
-        text="Generating local semantic embeddings..."
-    )
-
+    # ── PHASE 2: Local Semantic Embeddings ────────────────────────────────
+    progress.progress(0.35, text="Generating local semantic embeddings...")
     names_ordered = list(resume_texts.keys())
+    texts_ordered = [resume_texts[name] for name in names_ordered]
 
-    texts_ordered = [
-        resume_texts[name]
-        for name in names_ordered
-    ]
+    jd_embedding = generate_embeddings((jd_text,))[0]
+    resume_embeddings = generate_embeddings(tuple(texts_ordered))
+    skill_embeddings = generate_embeddings(tuple(required_skills))
 
-    jd_embedding = generate_embeddings(
-        (jd_text,)
-    )[0]
+    semantic_scores = compute_semantic_similarity(jd_embedding, resume_embeddings)
+    semantic_map = dict(zip(names_ordered, semantic_scores))
+    resume_embedding_map = dict(zip(names_ordered, resume_embeddings))
 
-    resume_embeddings = generate_embeddings(
-        tuple(texts_ordered)
-    )
-
-    skill_embeddings = generate_embeddings(
-        tuple(required_skills)
-    )
-
-    semantic_scores = compute_semantic_similarity(
-        jd_embedding,
-        resume_embeddings
-    )
-
-    semantic_map = dict(
-        zip(
-            names_ordered,
-            semantic_scores
-        )
-    )
-
-    resume_embedding_map = dict(
-        zip(
-            names_ordered,
-            resume_embeddings
-        )
-    )
-    # ── PHASE 3: Parallel deterministic scoring ──────────────────────────────
-    progress.progress(
-        0.4,
-        text="Scoring resumes in parallel..."
-    )
-
+    # ── PHASE 3: Parallel deterministic scoring ────────────────────────────
+    progress.progress(0.4, text="Scoring resumes in parallel...")
     results: list = []
 
     def score_one(name):
         text = resume_texts[name]
-
         result = score_resume_deterministic(
             resume_text=text,
             jd_text=jd_text,
@@ -1269,144 +963,132 @@ if analyze_clicked:
             resume_embedding=resume_embedding_map[name],
             skill_embeddings=skill_embeddings,
         )
-
         result["candidate_name"] = name
-
         return result
 
-    with ThreadPoolExecutor(
-        max_workers=min(len(resume_texts), 8)
-    ) as executor:
-
-        futures = {
-            executor.submit(score_one, n): n
-            for n in names_ordered
-        }
-
+    with ThreadPoolExecutor(max_workers=min(len(resume_texts), 8)) as executor:
+        futures = {executor.submit(score_one, n): n for n in names_ordered}
         done = 0
-
         for future in as_completed(futures):
             try:
                 results.append(future.result())
-
             except Exception as e:
                 name = futures[future]
-                st.warning(
-                    f"Scoring failed for {name}: {e}"
-                )
-
+                st.warning(f"Scoring failed for {name}: {e}")
             done += 1
-
-            progress.progress(
-                0.4 + done / len(resume_texts) * 0.3,
-                text=f"Scored {done}/{len(resume_texts)} resumes..."
-            )
+            progress.progress(0.4 + done / len(resume_texts) * 0.3, text=f"Scored {done}/{len(resume_texts)} resumes...")
 
     if not results:
         st.error("No resumes could be scored.")
         st.stop()
-        
-        
+
     progress.empty()
 
+    # ── PHASE 4: Rank ──────────────────────────────────────────────────────
+    results.sort(key=lambda r: r["final_score"], reverse=True)
 
-    # ── PHASE 4: Rank ────────────────────────────────────────────────────────
-    results.sort(
-        key=lambda r: r["final_score"],
-        reverse=True
-    )
+    shortlisted_names = [
+        r["candidate_name"]
+        for r in results
+        if r["final_score"] >= shortlist_threshold
+    ]
 
-
-   # suggestions
-
-    # ── RANKING DISPLAY ──────────────────────────────────────────────────────
+    # ── RECOMMENDATION SECTION (before ranking) ────────────────────────────
     st.divider()
-    st.subheader("🏆 Candidate Ranking")
+
+    st.markdown("<span class='step-label' style='margin-bottom:8px; display:inline-block;'>RESULTS</span>", unsafe_allow_html=True)
+
+    if shortlisted_names:
+        pills_html = "".join(
+            f"<span class='rec-candidate-pill'>✓ {name}</span>"
+            for name in shortlisted_names
+        )
+        st.markdown(
+            f"""
+            <div class="rec-section">
+                <div class="rec-eyebrow">Recommendation</div>
+                <div class="rec-heading">Recommended to Shortlist</div>
+                <div class="rec-subtext">
+                    These candidates meet or exceed the {shortlist_threshold}% screening threshold
+                    and are recommended for further review.
+                </div>
+                <div class="rec-candidate-list">
+                    {pills_html}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f"""
+            <div class="rec-section">
+                <div class="rec-eyebrow">Recommendation</div>
+                <div class="rec-heading">No Candidates Recommended</div>
+                <div class="rec-subtext">
+                    No candidates met the {shortlist_threshold}% shortlist threshold.
+                    Try lowering the threshold in the sidebar settings.
+                </div>
+                <div class="rec-none">
+                    ⚠ No candidates to shortlist at the current threshold.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # ── CANDIDATE RANKING ──────────────────────────────────────────────────
+    st.markdown("<h2 style='margin-top:8px; margin-bottom:16px;'>🏆 Candidate Ranking</h2>", unsafe_allow_html=True)
 
     for rank, r in enumerate(results, start=1):
         shortlisted = r["final_score"] >= shortlist_threshold
-        badge = "✅ Shortlisted" if shortlisted else "❌ Not shortlisted"
-        
 
         with st.container(border=True):
             top = st.columns([0.5, 3, 1, 1.5])
+
             with top[0]:
-             st.markdown(
-              f"<h3 style='color:#292529 !important;'>#{rank}</h3>",
-               unsafe_allow_html=True
+                st.markdown(
+                    f"<h3 style='color:#292529 !important; font-size:20px; font-weight:700;'>#{rank}</h3>",
+                    unsafe_allow_html=True
                 )
 
             with top[1]:
-             st.markdown(
-                 f"### {r['candidate_name']}"
-                )
+                st.markdown(f"### {r['candidate_name']}")
+
             with top[2]:
-             st.metric(
-              "ATS Score",
-              f"{r['final_score']}%"
-             )
+                st.metric("ATS Score", f"{r['final_score']}%")
 
             with top[3]:
-
-             if shortlisted:
-                  st.markdown(
-                     """
-                      <div style="
-                      background-color:#E8F5E9;
-                      color:#2E7D32;
-                      padding:10px 16px;
-                      border-radius:8px;
-                      font-size:16px;
-                      font-weight:700;
-                      text-align:center;
-                       ">
-                     ✓ Shortlisted
-                      </div>
-                      """,
-                      unsafe_allow_html=True
+                if shortlisted:
+                    st.markdown(
+                        """
+                        <div style="
+                            background-color:#E8F5E9; color:#2E7D32;
+                            padding:10px 16px; border-radius:8px;
+                            font-size:15px; font-weight:700; text-align:center;
+                        ">✓ Shortlisted</div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        """
+                        <div style="
+                            background-color:#FDECEC; color:#C62828;
+                            padding:10px 17px; border-radius:8px;
+                            font-size:15px; font-weight:700; text-align:center;
+                        ">✕ Not shortlisted</div>
+                        """,
+                        unsafe_allow_html=True
                     )
 
-             else:
-                 st.markdown(
-                      """
-                      <div style="
-                      background-color:#FDECEC;
-                      color:#C62828;
-                      padding:10px 17px;
-                      border-radius:8px;
-                     font-size:16px;
-                      font-weight:700;
-                     text-align:center;
-                      ">
-                     ✕ Not shortlisted
-                       </div>
-                     """,
-                      unsafe_allow_html=True
-                    )
-
-            with st.expander("Details"):
+            with st.expander("View Details"):
                 c1, c2, c3, c4, c5 = st.columns(5)
-
-                c1.metric(
-                    "Skill Match",
-                    f"{r.get('skill_match', 0)}%"
-                )
-                c2.metric(
-                    "Experience",
-                    f"{r.get('experience_score', 0)}%"
-                )
-                c3.metric(
-                    "Education",
-                    f"{r.get('education_score', 0)}%"
-                )
-                c4.metric(
-                    "Projects",
-                    f"{r.get('projects_score', 0)}%"
-                )
-                c5.metric(
-                    "Formatting",
-                    f"{r.get('formatting_score', 0)}%"
-                )
+                c1.metric("Skill Match", f"{r.get('skill_match', 0)}%")
+                c2.metric("Experience", f"{r.get('experience_score', 0)}%")
+                c3.metric("Education", f"{r.get('education_score', 0)}%")
+                c4.metric("Projects", f"{r.get('projects_score', 0)}%")
+                c5.metric("Formatting", f"{r.get('formatting_score', 0)}%")
 
                 d1, d2 = st.columns(2)
 
@@ -1419,58 +1101,3 @@ if analyze_clicked:
                     st.markdown("**❌ Missing Skills**")
                     for skill in r.get("missing_skills", []):
                         st.markdown(f"- {skill}")
-
-                
-
-               
-
-
-    # ── SUMMARY ─────────────────────────────────────────────────────────────
-    st.divider()
-
-    shortlisted_names = [
-        r["candidate_name"]
-        for r in results
-        if r["final_score"] >= shortlist_threshold
-    ]
-
-    if shortlisted_names:
-        st.markdown(
-            f"""
-            <div style="
-            background-color:#E8F5E9;
-            color:#2E7D32;
-            padding:10px 16px;
-            border-radius:8px;
-            font-size:18px;
-            font-weight:700;
-            text-align:center;
-            ">
-            ✅ Recommended to shortlist: 
-            <span style="font-weight:700;">
-                {', '.join(shortlisted_names)}
-            </span>
-            </div>
-            """
-           
-            ,
-            unsafe_allow_html=True
-        )
-    else:
-      st.markdown(
-         """
-          <div class="custom-no-shortlist">
-            <span class="custom-no-shortlist-icon">⚠</span>
-            <span class="custom-no-shortlist-text">
-                No candidates met the shortlist threshold.
-                Try lowering it in the sidebar.
-            </span>
-         </div>
-         """,
-          unsafe_allow_html=True
-        )
-        
-
-    
-
-   
