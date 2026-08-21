@@ -47,6 +47,32 @@ st.markdown("""
 }
 
 /* =========================================================
+   PAGE-LEVEL SCROLLBAR (thin, dark gray, far right edge)
+   ========================================================= */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #8A8386 #F7F6F4;
+}
+
+html::-webkit-scrollbar {
+    width: 9px;
+}
+
+html::-webkit-scrollbar-track {
+    background: #F7F6F4;
+}
+
+html::-webkit-scrollbar-thumb {
+    background-color: #8A8386;
+    border-radius: 5px;
+    border: 2px solid #F7F6F4;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+    background-color: #6F6A6D;
+}
+
+/* =========================================================
    SIDEBAR
    ========================================================= */
 section[data-testid="stSidebar"] {
@@ -268,6 +294,9 @@ section[data-testid="stSidebar"] .stButton > button:active {
    ---------------------------------------------------------
    Streamlit owns this button and its click behavior. We only
    style the real button; we do NOT hide/replace its children.
+   This styling now applies ONLY inside the Candidate CV
+   uploader (scoped via #cv-uploader-anchor + general sibling),
+   since the JD uploader's "+" button is hidden entirely below.
    ========================================================= */
 
 [data-testid="stFileUploaderFileList"] + div button,
@@ -329,6 +358,64 @@ section[data-testid="stSidebar"] .stButton > button:active {
 [data-testid="stFileUploaderDropzoneInstructions"] {
     visibility: visible !important;
     opacity: 1 !important;
+}
+
+/* =========================================================
+   JD UPLOADER — hide "Add files" (+) button entirely.
+   Scoped via st.container(key="jd_upload_container"), which
+   Streamlit renders as a real wrapper div carrying the class
+   "st-key-jd_upload_container". This is a reliable anchor,
+   unlike a plain markdown marker (which is not a true DOM
+   sibling of the widget).
+   ========================================================= */
+.st-key-jd_upload_container [data-testid="stFileUploader"] button[aria-label="Add files"] {
+    display: none !important;
+}
+
+/* Also remove any leftover spacing where that button used to sit */
+.st-key-jd_upload_container [data-testid="stFileUploaderFileList"] + div {
+    margin-top: 0 !important;
+}
+
+/* =========================================================
+   CANDIDATE CV UPLOADER — fixed max height + internal scroll
+   with a clearly visible thin dark-gray scrollbar, scoped via
+   st.container(key="cv_upload_container").
+   ========================================================= */
+.st-key-cv_upload_container [data-testid="stFileUploader"] {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 10px !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #6F6A6D #E4E1DE !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar {
+    width: 10px !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-track {
+    background: #E4E1DE !important;
+    border-radius: 6px !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-thumb {
+    background-color: #6F6A6D !important;
+    border-radius: 6px !important;
+    border: 2px solid #E4E1DE !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-thumb:hover {
+    background-color: #541F49 !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploaderDropzone"] {
+    flex-shrink: 0 !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploaderFileList"] {
+    overflow: visible !important;
 }
 
 /* =========================================================
@@ -415,12 +502,12 @@ hr { border-color: #DDD9D7 !important; }
 .stMarkdown { font-size: 16px; }
 
 /* =========================================================
-   SCROLLBAR
+   SCROLLBAR (legacy global rule, retained + refined above)
    ========================================================= */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: #F7F6F4; }
-::-webkit-scrollbar-thumb { background: #C8C3C0; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #A9A2A5; }
+::-webkit-scrollbar-thumb { background: #8A8386; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #6F6A6D; }
 
 /* =========================================================
    RESULT CARD TEXT
@@ -566,7 +653,8 @@ hr { border-color: #DDD9D7 !important; }
 }
 
 
-/* Change the + button to "Upload More" */
+/* Change the CV uploader's + button to "Upload More" (JD uploader's
+   + button is hidden entirely above, so this only affects the CV one) */
 
 [data-testid="stFileUploader"] button[aria-label="Add files"] {
     width: 105px !important;
@@ -913,12 +1001,16 @@ with jd_col:
         unsafe_allow_html=True
     )
 
-    jd_file = st.file_uploader(
-        "Upload Job Description",
-        type=["pdf", "txt", "docx"],
-        key="jd_upload",
-        help="Upload a PDF, TXT or DOCX job description."
-    )
+    # Wrapped in a keyed container so CSS can reliably scope the
+    # "Add files +" button removal to this uploader only (JD stays
+    # single-file — no Upload More button here).
+    with st.container(key="jd_upload_container"):
+        jd_file = st.file_uploader(
+            "Upload Job Description",
+            type=["pdf", "txt", "docx"],
+            key="jd_upload",
+            help="Upload a PDF, TXT or DOCX job description."
+        )
 
 
 # --------------------------------------------------------------------------
@@ -939,17 +1031,22 @@ with cv_col:
     )
     st.markdown(
         "<p style='font-size:15px; color:#6F6A6D; margin:0 0 14px 0; line-height:1.6;'>"
-        "Upload one or more candidate PDF resumes. Select multiple files at once, or click the <b>+</b> button to add more.</p>",
+        "Upload one or more candidate PDF resumes.</p>",
         unsafe_allow_html=True
     )
 
-    resume_files = st.file_uploader(
-        "Upload Candidate CVs",
-        type=["pdf"],
-        accept_multiple_files=True,
-        key="resume_upload",
-        help="Select multiple candidate resumes. After uploading, click + to add more files."
-    )
+    # Wrapped in a keyed container so CSS can reliably scope the
+    # fixed max-height + scrollbar behavior to this uploader only.
+    # The "Upload More +" button stays visible here — candidates
+    # can have multiple resumes.
+    with st.container(key="cv_upload_container"):
+        resume_files = st.file_uploader(
+            "Upload Candidate CVs",
+            type=["pdf"],
+            accept_multiple_files=True,
+            key="resume_upload",
+            help="Select multiple candidate resumes. After uploading, click + to add more files."
+        )
 
     if resume_files:
         st.caption(f"{len(resume_files)} resume{'s' if len(resume_files) != 1 else ''} added · Click + to add more")
@@ -1080,6 +1177,7 @@ if analyze_clicked:
     ]
 
     # ── RECOMMENDATION SECTION (before ranking) ────────────────────────────
+    st.markdown("<div id='results-anchor'></div>", unsafe_allow_html=True)
     st.divider()
 
     st.markdown("<span class='step-label' style='margin-bottom:8px; display:inline-block;'>RESULTS</span>", unsafe_allow_html=True)
@@ -1187,3 +1285,18 @@ if analyze_clicked:
                     st.markdown("**❌ Missing Skills**")
                     for skill in r.get("missing_skills", []):
                         st.markdown(f"- {skill}")
+
+    # ── Smooth-scroll down to the results section ───────────────────────────
+    st.markdown(
+        """
+        <script>
+        setTimeout(function() {
+            const el = window.parent.document.getElementById('results-anchor');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 300);
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
