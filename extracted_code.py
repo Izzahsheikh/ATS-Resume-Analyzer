@@ -164,7 +164,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
 }
 
 /* =========================================================
-   FILE UPLOADER
+   FILE UPLOADER — equal height for both columns
    ========================================================= */
 [data-testid="stFileUploader"] {
     background-color: #F0EFEC !important;
@@ -199,15 +199,30 @@ section[data-testid="stSidebar"] .stButton > button:active {
     background-color: #EDE0EC !important;
 }
 
+/* =========================================================
+   FILE UPLOADER LABEL — black text, hover-only tooltip icon
+   ========================================================= */
 [data-testid="stFileUploader"] label {
     color: #292529 !important;
-    font-size: 16px !important;
+    -webkit-text-fill-color: #292529 !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
     line-height: 1.5 !important;
 }
 
+/* Hide the ? button by default, show only on hover */
+[data-testid="stFileUploader"] [data-testid="stTooltipHoverTarget"] {
+    opacity: 0 !important;
+    transition: opacity 0.15s ease !important;
+}
+
+[data-testid="stFileUploader"]:hover [data-testid="stTooltipHoverTarget"] {
+    opacity: 1 !important;
+}
+
 [data-testid="stFileUploader"] small {
-    color: #6F6A6D !important;
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
     font-size: 14px !important;
     line-height: 1.5 !important;
 }
@@ -215,14 +230,6 @@ section[data-testid="stSidebar"] .stButton > button:active {
 /* =========================================================
    UPLOAD BUTTON (Browse / Upload)
    ========================================================= */
-
-/* Hide the native + (add more files) button Streamlit renders */
-[data-testid="stFileUploaderFileList"] ~ div button,
-[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] ~ div > button:last-child {
-    display: none !important;
-}
-
-/* Style all uploader buttons (Upload / Browse) */
 [data-testid="stFileUploader"] button {
     background-color: #6B3A5E !important;
     border: 1px solid #6B3A5E !important;
@@ -256,30 +263,72 @@ section[data-testid="stSidebar"] .stButton > button:active {
     font-size: 13px !important;
 }
 
-/* ADD MORE CVs custom button */
-.add-more-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #6B3A5E;
-    border: 1.5px solid #6B3A5E;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #FFFFFF;
-    cursor: pointer;
-    margin-top: 12px;
-    text-decoration: none;
-    transition: background-color 0.15s ease;
-    width: 100%;
-    justify-content: center;
-    box-sizing: border-box;
+/* =========================================================
+   ADD MORE FILES (+) BUTTON
+   ---------------------------------------------------------
+   Streamlit owns this button and its click behavior. We only
+   style the real button; we do NOT hide/replace its children.
+   ========================================================= */
+
+[data-testid="stFileUploaderFileList"] + div button,
+[data-testid="stFileUploaderFileList"] ~ div button {
+    background-color: #EDE0EC !important;
+    border: 1.5px dashed #C9A8C4 !important;
+    border-radius: 8px !important;
+    min-height: 42px !important;
+    min-width: 58px !important;
+    padding: 0 14px !important;
+    color: #541F49 !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
 }
 
-.add-more-btn:hover {
-    background-color: #541F49;
-    border-color: #541F49;
+[data-testid="stFileUploaderFileList"] + div button:hover,
+[data-testid="stFileUploaderFileList"] ~ div button:hover {
+    background-color: #DCC7D9 !important;
+    border-color: #541F49 !important;
+    color: #541F49 !important;
+}
+
+[data-testid="stFileUploaderFileList"] + div button:focus,
+[data-testid="stFileUploaderFileList"] + div button:focus-visible,
+[data-testid="stFileUploaderFileList"] ~ div button:focus,
+[data-testid="stFileUploaderFileList"] ~ div button:focus-visible {
+    background-color: #EDE0EC !important;
+    border-color: #541F49 !important;
+    color: #541F49 !important;
+    box-shadow: 0 0 0 2px rgba(84, 31, 73, 0.15) !important;
+}
+
+[data-testid="stFileUploaderFileList"] + div button svg,
+[data-testid="stFileUploaderFileList"] + div button span,
+[data-testid="stFileUploaderFileList"] + div button p,
+[data-testid="stFileUploaderFileList"] ~ div button svg,
+[data-testid="stFileUploaderFileList"] ~ div button span,
+[data-testid="stFileUploaderFileList"] ~ div button p {
+    color: #541F49 !important;
+    fill: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+}
+
+/* =========================================================
+   DROPZONE
+   ---------------------------------------------------------
+   Keep Streamlit's uploader behavior intact.
+   ========================================================= */
+[data-testid="stFileUploaderDropzone"] {
+    min-height: 80px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+[data-testid="stFileUploaderDropzoneInstructions"] {
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* =========================================================
@@ -423,33 +472,6 @@ hr { border-color: #DDD9D7 !important; }
     border-radius: 5px;
     padding: 5px 14px;
     margin-bottom: 12px;
-}
-
-/* =========================================================
-   UPLOAD CARD
-   ========================================================= */
-.upload-card {
-    background: #FFFFFF;
-    border: 1.5px solid #DDD9D7;
-    border-radius: 12px;
-    padding: 24px 24px 20px 24px;
-    height: 100%;
-}
-
-.upload-card-heading {
-    font-size: 18px;
-    font-weight: 700;
-    color: #292529;
-    margin: 0 0 4px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.upload-card-sub {
-    font-size: 13px;
-    color: #6F6A6D;
-    margin: 0 0 16px 0;
 }
 
 /* =========================================================
@@ -862,24 +884,22 @@ with jd_col:
         unsafe_allow_html=True
     )
     st.markdown(
-        "<p style='font-size:15px; color:#6F6A6D; margin:0 0 18px 0; line-height:1.6;'>Upload a single JD file — PDF, DOCX, or TXT.<br>Drag &amp; drop directly into the box below, or click <b>Upload</b>.</p>",
+        "<p style='font-size:15px; color:#6F6A6D; margin:0 0 14px 0; line-height:1.6;'>"
+        "Upload a single JD file — PDF, DOCX, or TXT. Drag &amp; drop or click <b>Upload</b>.</p>",
         unsafe_allow_html=True
     )
 
     jd_file = st.file_uploader(
-        "Drop your Job Description here, or click Upload",
+        "Upload Job Description",
         type=["pdf", "txt", "docx"],
         key="jd_upload",
-        help="One job description is enough."
+        help="Upload a PDF, TXT or DOCX job description."
     )
 
 
 # --------------------------------------------------------------------------
 # CANDIDATE CVs  (STEP 2 / 2)
 # --------------------------------------------------------------------------
-_prev_cvs = st.session_state.get("resume_upload", []) or []
-_has_cvs = len(_prev_cvs) > 0
-
 with cv_col:
     st.markdown(
         """
@@ -893,243 +913,22 @@ with cv_col:
         "<p style='font-size:20px; font-weight:700; color:#292529; margin:0 0 8px 0; line-height:1.4;'>👥 Candidate CVs</p>",
         unsafe_allow_html=True
     )
-
-    if _has_cvs:
-        cv_count = len(_prev_cvs)
-        st.markdown(
-            f"<p style='font-size:15px; color:#6F6A6D; margin:0 0 14px 0; line-height:1.6;'>"
-            f"<b style='color:#292529;'>{cv_count} CV{'s' if cv_count != 1 else ''}</b> ready for analysis.</p>",
-            unsafe_allow_html=True
-        )
-    else:
-        st.markdown(
-            "<p style='font-size:15px; color:#6F6A6D; margin:0 0 14px 0; line-height:1.6;'>"
-            "Upload one or more candidate PDF resumes.</p>",
-            unsafe_allow_html=True
-        )
-
-    # Hide the default Streamlit uploader UI entirely — we render our own
-    st.markdown("""
-        <style>
-        /* Hide the native Streamlit file uploader widget visually,
-           keep it in DOM so files still register */
-        div[data-testid="stFileUploader"]:has(input[data-testid="stFileUploaderInput"]) {
-            position: absolute !important;
-            width: 1px !important;
-            height: 1px !important;
-            overflow: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        "<p style='font-size:15px; color:#6F6A6D; margin:0 0 14px 0; line-height:1.6;'>"
+        "Upload one or more candidate PDF resumes. Select multiple files at once, or click the <b>+</b> button to add more.</p>",
+        unsafe_allow_html=True
+    )
 
     resume_files = st.file_uploader(
-        "Upload CVs",
+        "Upload Candidate CVs",
         type=["pdf"],
         accept_multiple_files=True,
         key="resume_upload",
-        label_visibility="collapsed"
+        help="Select multiple candidate resumes. After uploading, click + to add more files."
     )
 
-    # Custom drag & drop zone using st.components
-    import streamlit.components.v1 as components
-
-    has_cvs_js = "true" if _has_cvs else "false"
-    cv_count_js = len(_prev_cvs)
-    cv_names_js = ", ".join(f.name for f in _prev_cvs) if _prev_cvs else ""
-
-    components.html(f"""
-    <style>
-      * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }}
-
-      .drop-zone {{
-        background: #F7F4F7;
-        border: 2px dashed #C0B4BE;
-        border-radius: 10px;
-        padding: 28px 20px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        position: relative;
-      }}
-
-      .drop-zone.drag-over {{
-        background: #EDE0EC;
-        border-color: #541F49;
-        border-style: solid;
-      }}
-
-      .drop-icon {{
-        font-size: 28px;
-        margin-bottom: 10px;
-        display: block;
-      }}
-
-      .drop-title {{
-        font-size: 15px;
-        font-weight: 700;
-        color: #292529;
-        margin-bottom: 5px;
-      }}
-
-      .drop-sub {{
-        font-size: 13px;
-        color: #6F6A6D;
-        margin-bottom: 16px;
-      }}
-
-      .btn-upload {{
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        background: #6B3A5E;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 22px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background 0.15s;
-      }}
-
-      .btn-upload:hover {{ background: #541F49; }}
-
-      .file-list {{
-        margin-top: 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        max-height: 200px;
-        overflow-y: auto;
-        padding-right: 4px;
-      }}
-
-      .file-list::-webkit-scrollbar {{ width: 6px; }}
-      .file-list::-webkit-scrollbar-thumb {{ background: #C8C3C0; border-radius: 3px; }}
-
-      .file-item {{
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #fff;
-        border: 1px solid #E0D8DF;
-        border-radius: 7px;
-        padding: 8px 12px;
-        font-size: 13px;
-        color: #292529;
-        font-weight: 500;
-      }}
-
-      .file-icon {{ font-size: 16px; }}
-      .file-name {{ flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-
-      .add-more {{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        background: #6B3A5E;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 11px 20px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        margin-top: 14px;
-        width: 100%;
-        transition: background 0.15s;
-      }}
-
-      .add-more:hover {{ background: #541F49; }}
-
-      input[type=file] {{ display: none; }}
-    </style>
-
-    <input type="file" id="cvInput" multiple accept=".pdf" />
-
-    <div class="drop-zone" id="dropZone">
-      <span class="drop-icon">📄</span>
-      <div class="drop-title">Drag &amp; drop PDF resumes here</div>
-      <div class="drop-sub">or click the button below to browse your files</div>
-      <button class="btn-upload" onclick="document.getElementById('cvInput').click()">
-        ⬆ Upload CVs
-      </button>
-
-      <div class="file-list" id="fileList"></div>
-    </div>
-
-    {"<button class='add-more' onclick=\"document.getElementById('cvInput').click()\">＋ Add More CVs</button>" if _has_cvs else ""}
-
-    <script>
-      const dropZone = document.getElementById('dropZone');
-      const cvInput  = document.getElementById('cvInput');
-      const fileList = document.getElementById('fileList');
-
-      // Show already-uploaded file names from Python
-      const existingNames = `{cv_names_js}`;
-      if (existingNames) {{
-        existingNames.split(', ').forEach(name => {{
-          if (name.trim()) addFileItem(name.trim());
-        }});
-      }}
-
-      // Drag events
-      dropZone.addEventListener('dragover', e => {{
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-      }});
-
-      dropZone.addEventListener('dragleave', () => {{
-        dropZone.classList.remove('drag-over');
-      }});
-
-      dropZone.addEventListener('drop', e => {{
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        handleFiles(e.dataTransfer.files);
-      }});
-
-      // File input change
-      cvInput.addEventListener('change', () => {{
-        handleFiles(cvInput.files);
-      }});
-
-      function handleFiles(files) {{
-        if (!files || files.length === 0) return;
-
-        // Pass files to the Streamlit native uploader hidden in parent frame
-        try {{
-          const parentDoc = window.parent.document;
-          const nativeInput = parentDoc.querySelector('input[data-testid="stFileUploaderInput"]');
-          if (nativeInput) {{
-            const dt = new DataTransfer();
-            // Keep existing files
-            if (nativeInput.files) {{
-              Array.from(nativeInput.files).forEach(f => dt.items.add(f));
-            }}
-            Array.from(files).forEach(f => dt.items.add(f));
-            nativeInput.files = dt.files;
-            nativeInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
-          }}
-        }} catch(e) {{
-          console.warn('Could not pass to Streamlit input:', e);
-        }}
-
-        // Show in our UI
-        Array.from(files).forEach(f => addFileItem(f.name));
-      }}
-
-      function addFileItem(name) {{
-        const item = document.createElement('div');
-        item.className = 'file-item';
-        item.innerHTML = `<span class="file-icon">📄</span><span class="file-name">${{name}}</span>`;
-        fileList.appendChild(item);
-      }}
-    </script>
-    """, height=_has_cvs * 60 + (280 if not _has_cvs else 320), scrolling=False)
+    if resume_files:
+        st.caption(f"{len(resume_files)} resume{'s' if len(resume_files) != 1 else ''} added · Click + to add more")
 
 
 # --------------------------------------------------------------------------
