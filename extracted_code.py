@@ -550,6 +550,7 @@ hr { border-color: #DDD9D7 !important; }
     color: #B94A32;
 }
 
+<<<<<<< HEAD
 /* =========================================================
    HIDE the native internal "+" button Streamlit renders
    inside the file uploader file list — we use our own button
@@ -594,6 +595,31 @@ div[data-testid="stFileUploader"] > div > div:last-child > div > button {
     color: #541F49;
     margin-bottom: 10px;
 }
+=======
+
+/* Change the + button to "Upload More" */
+
+[data-testid="stFileUploader"] button[aria-label="Add files"] {
+    width: 105px !important;
+    height: 42px !important;
+    font-size: 0 !important;
+}
+
+/* Hide the + icon */
+[data-testid="stFileUploader"] button[aria-label="Add files"] svg {
+    display: none !important;
+}
+
+/* Show Upload More text */
+[data-testid="stFileUploader"] button[aria-label="Add files"]::before {
+    content: "Upload More" !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+>>>>>>> 9086f8908097b09dc6bd0d89b265cdd1d21f1100
 
 </style>
 """, unsafe_allow_html=True)
