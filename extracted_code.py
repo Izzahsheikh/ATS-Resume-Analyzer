@@ -387,27 +387,27 @@ section[data-testid="stSidebar"] .stButton > button:active {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding-right: 10px !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #6F6A6D #E4E1DE !important;
+    scrollbar-width: auto !important;
+    scrollbar-color: #4A4A4A #D8D4D1 !important;
 }
 
 .st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar {
-    width: 10px !important;
+    width: 12px !important;
 }
 
 .st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-track {
-    background: #E4E1DE !important;
+    background: #D8D4D1 !important;
     border-radius: 6px !important;
 }
 
 .st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-thumb {
-    background-color: #6F6A6D !important;
+    background-color: #4A4A4A !important;
     border-radius: 6px !important;
-    border: 2px solid #E4E1DE !important;
+    border: 2px solid #D8D4D1 !important;
 }
 
 .st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-thumb:hover {
-    background-color: #541F49 !important;
+    background-color: #2E2E2E !important;
 }
 
 .st-key-cv_upload_container [data-testid="stFileUploaderDropzone"] {
