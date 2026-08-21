@@ -565,6 +565,30 @@ hr { border-color: #DDD9D7 !important; }
     color: #B94A32;
 }
 
+
+/* Change the + button to "Upload More" */
+
+[data-testid="stFileUploader"] button[aria-label="Add files"] {
+    width: 105px !important;
+    height: 42px !important;
+    font-size: 0 !important;
+}
+
+/* Hide the + icon */
+[data-testid="stFileUploader"] button[aria-label="Add files"] svg {
+    display: none !important;
+}
+
+/* Show Upload More text */
+[data-testid="stFileUploader"] button[aria-label="Add files"]::before {
+    content: "Upload More" !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+
 </style>
 """, unsafe_allow_html=True)
 
