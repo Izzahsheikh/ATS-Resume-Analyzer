@@ -106,17 +106,7 @@ section[data-testid="stSidebar"] div[data-testid="stTextInput"] input:focus {
 }
 
 /* =========================================================
-   HIDE NATIVE "+" BUTTON INSIDE FILE UPLOADER — nuclear option
-   ========================================================= */
-
-/* The native + sits in a div immediately after the file list */
-[data-testid="stFileUploaderFileList"] + div,
-[data-testid="stFileUploaderFileList"] ~ div {
-    display: none !important;
-}
-
-/* =========================================================
-   THRESHOLD MINUS / PLUS BUTTONS  (sidebar only)
+   THRESHOLD MINUS / PLUS BUTTONS
    ========================================================= */
 section[data-testid="stSidebar"] .stButton > button {
     min-height: 40px !important;
@@ -150,7 +140,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
 }
 
 /* =========================================================
-   MAIN BUTTONS (Analyze Candidates)
+   MAIN BUTTONS
    ========================================================= */
 .stButton > button {
     background-color: #6B3A5E !important;
@@ -174,45 +164,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
 }
 
 /* =========================================================
-   "Click to Add More CVs" BUTTON  — distinct dashed style
-   ========================================================= */
-.add-more-btn .stButton > button {
-    background-color: #EDE0EC !important;
-    border: 1.5px dashed #C9A8C4 !important;
-    border-radius: 8px !important;
-    min-height: 48px !important;
-    width: 100% !important;
-    padding: 0 20px !important;
-    color: #541F49 !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.01em !important;
-    transition: background-color 0.15s ease, border-color 0.15s ease !important;
-}
-
-.add-more-btn .stButton > button p,
-.add-more-btn .stButton > button span {
-    color: #541F49 !important;
-    -webkit-text-fill-color: #541F49 !important;
-}
-
-.add-more-btn .stButton > button:hover {
-    background-color: #DCC7D9 !important;
-    border-color: #541F49 !important;
-    color: #541F49 !important;
-}
-
-.add-more-btn .stButton > button:focus,
-.add-more-btn .stButton > button:focus-visible,
-.add-more-btn .stButton > button:active {
-    background-color: #EDE0EC !important;
-    border-color: #541F49 !important;
-    color: #541F49 !important;
-    box-shadow: 0 0 0 2px rgba(84,31,73,0.15) !important;
-}
-
-/* =========================================================
-   FILE UPLOADER
+   FILE UPLOADER — equal height for both columns
    ========================================================= */
 [data-testid="stFileUploader"] {
     background-color: #F0EFEC !important;
@@ -229,6 +181,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
     padding: 20px 16px !important;
 }
 
+/* Dropzone instruction text */
 [data-testid="stFileUploaderDropzoneInstructions"] {
     font-size: 15px !important;
     color: #6F6A6D !important;
@@ -239,12 +192,16 @@ section[data-testid="stSidebar"] .stButton > button:active {
     color: #6F6A6D !important;
 }
 
+/* Drag active state */
 [data-testid="stFileUploaderDropzone"]:hover,
 [data-testid="stFileUploaderDropzone"][data-dragging="true"] {
     border-color: #541F49 !important;
     background-color: #EDE0EC !important;
 }
 
+/* =========================================================
+   FILE UPLOADER LABEL — black text, hover-only tooltip icon
+   ========================================================= */
 [data-testid="stFileUploader"] label {
     color: #292529 !important;
     -webkit-text-fill-color: #292529 !important;
@@ -253,6 +210,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
     line-height: 1.5 !important;
 }
 
+/* Hide the ? button by default, show only on hover */
 [data-testid="stFileUploader"] [data-testid="stTooltipHoverTarget"] {
     opacity: 0 !important;
     transition: opacity 0.15s ease !important;
@@ -295,6 +253,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
     box-shadow: none !important;
 }
 
+/* Style the small × delete button on uploaded file chips */
 [data-testid="stFileUploaderDeleteBtn"] button {
     background-color: transparent !important;
     border: none !important;
@@ -304,6 +263,62 @@ section[data-testid="stSidebar"] .stButton > button:active {
     font-size: 13px !important;
 }
 
+/* =========================================================
+   ADD MORE FILES (+) BUTTON
+   ---------------------------------------------------------
+   Streamlit owns this button and its click behavior. We only
+   style the real button; we do NOT hide/replace its children.
+   ========================================================= */
+
+[data-testid="stFileUploaderFileList"] + div button,
+[data-testid="stFileUploaderFileList"] ~ div button {
+    background-color: #EDE0EC !important;
+    border: 1.5px dashed #C9A8C4 !important;
+    border-radius: 8px !important;
+    min-height: 42px !important;
+    min-width: 58px !important;
+    padding: 0 14px !important;
+    color: #541F49 !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin-top: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+
+[data-testid="stFileUploaderFileList"] + div button:hover,
+[data-testid="stFileUploaderFileList"] ~ div button:hover {
+    background-color: #DCC7D9 !important;
+    border-color: #541F49 !important;
+    color: #541F49 !important;
+}
+
+[data-testid="stFileUploaderFileList"] + div button:focus,
+[data-testid="stFileUploaderFileList"] + div button:focus-visible,
+[data-testid="stFileUploaderFileList"] ~ div button:focus,
+[data-testid="stFileUploaderFileList"] ~ div button:focus-visible {
+    background-color: #EDE0EC !important;
+    border-color: #541F49 !important;
+    color: #541F49 !important;
+    box-shadow: 0 0 0 2px rgba(84, 31, 73, 0.15) !important;
+}
+
+[data-testid="stFileUploaderFileList"] + div button svg,
+[data-testid="stFileUploaderFileList"] + div button span,
+[data-testid="stFileUploaderFileList"] + div button p,
+[data-testid="stFileUploaderFileList"] ~ div button svg,
+[data-testid="stFileUploaderFileList"] ~ div button span,
+[data-testid="stFileUploaderFileList"] ~ div button p {
+    color: #541F49 !important;
+    fill: #541F49 !important;
+    -webkit-text-fill-color: #541F49 !important;
+}
+
+/* =========================================================
+   DROPZONE
+   ---------------------------------------------------------
+   Keep Streamlit's uploader behavior intact.
+   ========================================================= */
 [data-testid="stFileUploaderDropzone"] {
     min-height: 80px !important;
     display: flex !important;
@@ -549,77 +564,6 @@ hr { border-color: #DDD9D7 !important; }
     font-weight: 600;
     color: #B94A32;
 }
-
-<<<<<<< HEAD
-/* =========================================================
-   HIDE the native internal "+" button Streamlit renders
-   inside the file uploader file list — we use our own button
-   ========================================================= */
-[data-testid="stFileUploaderFileList"] ~ div button,
-[data-testid="stFileUploaderFileList"] + div button,
-[data-testid="baseButton-secondary"][kind="secondary"] svg ~ *,
-div[data-testid="stFileUploader"] > div > div:last-child > div > button {
-    display: none !important;
-}
-
-/* Hide ANY button whose only child is an SVG plus icon inside uploaders */
-[data-testid="stFileUploader"] button:has(svg):not([data-testid="stFileUploaderDeleteBtn"] button) {
-    display: none !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    pointer-events: none !important;
-}
-
-/* =========================================================
-   CV UPLOADER SLOT — subtle separator between slots
-   ========================================================= */
-.cv-slot-wrapper {
-    margin-bottom: 8px;
-}
-
-/* =========================================================
-   CV COUNT BADGE
-   ========================================================= */
-.cv-count-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #EDE0EC;
-    border: 1px solid #C9A8C4;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #541F49;
-    margin-bottom: 10px;
-}
-=======
-
-/* Change the + button to "Upload More" */
-
-[data-testid="stFileUploader"] button[aria-label="Add files"] {
-    width: 105px !important;
-    height: 42px !important;
-    font-size: 0 !important;
-}
-
-/* Hide the + icon */
-[data-testid="stFileUploader"] button[aria-label="Add files"] svg {
-    display: none !important;
-}
-
-/* Show Upload More text */
-[data-testid="stFileUploader"] button[aria-label="Add files"]::before {
-    content: "Upload More" !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
-}
-
->>>>>>> 9086f8908097b09dc6bd0d89b265cdd1d21f1100
 
 </style>
 """, unsafe_allow_html=True)
@@ -919,11 +863,7 @@ with st.sidebar:
 # UPLOAD SECTION HEADING
 # --------------------------------------------------------------------------
 st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Start Screening</h2>", unsafe_allow_html=True)
-st.markdown(
-    "<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>"
-    "Complete both steps below, then click <b>Analyze Candidates</b>.</p>",
-    unsafe_allow_html=True
-)
+st.markdown("<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>Complete both steps below, then click <b>Analyze Candidates</b>.</p>", unsafe_allow_html=True)
 
 jd_col, cv_col = st.columns(2, gap="large")
 
@@ -932,7 +872,11 @@ jd_col, cv_col = st.columns(2, gap="large")
 # --------------------------------------------------------------------------
 with jd_col:
     st.markdown(
-        '<div style="margin-bottom: 10px;"><span class="step-label">STEP 1 / 2</span></div>',
+        """
+        <div style="margin-bottom: 10px;">
+            <span class="step-label">STEP 1 / 2</span>
+        </div>
+        """,
         unsafe_allow_html=True
     )
     st.markdown(
@@ -944,6 +888,7 @@ with jd_col:
         "Upload a single JD file — PDF, DOCX, or TXT. Drag &amp; drop or click <b>Upload</b>.</p>",
         unsafe_allow_html=True
     )
+
     jd_file = st.file_uploader(
         "Upload Job Description",
         type=["pdf", "txt", "docx"],
@@ -955,19 +900,13 @@ with jd_col:
 # --------------------------------------------------------------------------
 # CANDIDATE CVs  (STEP 2 / 2)
 # --------------------------------------------------------------------------
-
-# Session state: track how many uploader slots exist
-if "cv_uploader_count" not in st.session_state:
-    st.session_state.cv_uploader_count = 1
-
-
-def add_cv_slot():
-    st.session_state.cv_uploader_count += 1
-
-
 with cv_col:
     st.markdown(
-        '<div style="margin-bottom: 10px;"><span class="step-label">STEP 2 / 2</span></div>',
+        """
+        <div style="margin-bottom: 10px;">
+            <span class="step-label">STEP 2 / 2</span>
+        </div>
+        """,
         unsafe_allow_html=True
     )
     st.markdown(
@@ -976,106 +915,21 @@ with cv_col:
     )
     st.markdown(
         "<p style='font-size:15px; color:#6F6A6D; margin:0 0 14px 0; line-height:1.6;'>"
-        "Upload candidate PDF resumes. Select multiple files at once, or click "
-        "<b>Click to Add More CVs</b> to open another upload slot.</p>",
+        "Upload one or more candidate PDF resumes. Select multiple files at once, or click the <b>+</b> button to add more.</p>",
         unsafe_allow_html=True
     )
 
-    # ── Render one uploader per slot ──────────────────────────────────────
-    all_resume_files: list = []
-    seen_names: set = set()  # deduplicate by filename
-
-    for i in range(st.session_state.cv_uploader_count):
-        label = "Upload Candidate CVs" if i == 0 else f"Add More CVs (batch {i + 1})"
-        uploaded = st.file_uploader(
-            label,
-            type=["pdf"],
-            accept_multiple_files=True,
-            key=f"resume_upload_{i}",
-            help="Select one or more PDF resumes.",
-            label_visibility="collapsed" if i > 0 else "visible",
-        )
-        if uploaded:
-            for f in uploaded:
-                if f.name not in seen_names:
-                    seen_names.add(f.name)
-                    all_resume_files.append(f)
-
-    # ── JS: rename the native "+" button to "Click to Add More CVs" ──────
-    # MutationObserver watches the DOM and renames any + button it finds
-    # inside a file uploader, every time Streamlit re-renders.
-    st.components.v1.html("""
-    <script>
-    (function() {
-        function renameAddButton() {
-            // Find all buttons inside file uploaders
-            const uploaders = document.querySelectorAll('[data-testid="stFileUploader"]');
-            uploaders.forEach(function(uploader) {
-                const buttons = uploader.querySelectorAll('button');
-                buttons.forEach(function(btn) {
-                    // The native + button has a single SVG child (the plus icon)
-                    // and its textContent is "+" or empty (just SVG)
-                    const txt = btn.textContent.trim();
-                    const hasSvg = btn.querySelector('svg') !== null;
-                    const isDeleteBtn = btn.closest('[data-testid="stFileUploaderDeleteBtn"]') !== null;
-
-                    if (!isDeleteBtn && hasSvg && (txt === '+' || txt === '' || txt === '＋')) {
-                        // Replace the entire button content
-                        btn.innerHTML = '➕ &nbsp;Click to Add More CVs';
-                        btn.style.cssText = `
-                            background-color: #EDE0EC !important;
-                            border: 1.5px dashed #C9A8C4 !important;
-                            border-radius: 8px !important;
-                            min-height: 46px !important;
-                            min-width: 220px !important;
-                            padding: 0 20px !important;
-                            color: #541F49 !important;
-                            font-size: 14px !important;
-                            font-weight: 700 !important;
-                            cursor: pointer !important;
-                            white-space: nowrap !important;
-                        `;
-                    }
-                });
-            });
-        }
-
-        // Run immediately
-        renameAddButton();
-
-        // Watch for DOM changes (Streamlit re-renders after every interaction)
-        const observer = new MutationObserver(function() {
-            renameAddButton();
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    })();
-    </script>
-    """, height=0)
-
-    # ── Total count badge ─────────────────────────────────────────────────
-    if all_resume_files:
-        count = len(all_resume_files)
-        st.markdown(
-            f"<div class='cv-count-badge'>📄 {count} CV{'s' if count != 1 else ''} ready for analysis</div>",
-            unsafe_allow_html=True
-        )
-
-    # ── "Click to Add More CVs" button (our own custom one below) ─────────
-    st.markdown("<div class='add-more-btn'>", unsafe_allow_html=True)
-    st.button(
-        "➕  Click to Add More CVs",
-        key="add_cv_slot_btn",
-        on_click=add_cv_slot,
-        use_container_width=True,
+    resume_files = st.file_uploader(
+        "Upload Candidate CVs",
+        type=["pdf"],
+        accept_multiple_files=True,
+        key="resume_upload",
+        help="Select multiple candidate resumes. After uploading, click + to add more files."
     )
-    st.markdown("</div>", unsafe_allow_html=True)
 
-# Use the collected files for analysis
-resume_files = all_resume_files
+    if resume_files:
+        st.caption(f"{len(resume_files)} resume{'s' if len(resume_files) != 1 else ''} added · Click + to add more")
+
 
 # --------------------------------------------------------------------------
 # ANALYZE BUTTON
@@ -1201,8 +1055,9 @@ if analyze_clicked:
         if r["final_score"] >= shortlist_threshold
     ]
 
-    # ── RECOMMENDATION SECTION ─────────────────────────────────────────────
+    # ── RECOMMENDATION SECTION (before ranking) ────────────────────────────
     st.divider()
+
     st.markdown("<span class='step-label' style='margin-bottom:8px; display:inline-block;'>RESULTS</span>", unsafe_allow_html=True)
 
     if shortlisted_names:
@@ -1219,7 +1074,9 @@ if analyze_clicked:
                     These candidates meet or exceed the {shortlist_threshold}% screening threshold
                     and are recommended for further review.
                 </div>
-                <div class="rec-candidate-list">{pills_html}</div>
+                <div class="rec-candidate-list">
+                    {pills_html}
+                </div>
             </div>
             """,
             unsafe_allow_html=True
