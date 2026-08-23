@@ -84,12 +84,6 @@ st.markdown("""
     height: 0 !important;
 }
 
-*::-webkit-scrollbar-button {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-
 /* =========================================================
    SIDEBAR
    ========================================================= */
@@ -380,14 +374,6 @@ section[data-testid="stSidebar"] .stButton > button:active {
 
 /* =========================================================
    CV UPLOADER — scrollable file list, always-visible thumb
-   =========================================================
-   WHY stFileUploaderFileList and not stFileUploader:
-   The scrollbar only appears on the element that actually
-   overflows. Streamlit renders uploaded file entries inside
-   [data-testid="stFileUploaderFileList"], which is the true
-   scroll container. Styling the parent stFileUploader has no
-   effect on webkit-scrollbar pseudo-elements because those
-   only apply to the element with overflow set on it.
    ========================================================= */
 .st-key-cv_upload_container [data-testid="stFileUploaderFileList"] {
     max-height: 200px !important;
@@ -656,6 +642,34 @@ hr { border-color: #DDD9D7 !important; }
     white-space: nowrap !important;
 }
 
+/* =========================================================
+   THRESHOLD INPUT — main area (not sidebar)
+   ========================================================= */
+div[data-testid="stTextInput"] > div {
+    background-color: #FFFFFF !important;
+    border-radius: 7px !important;
+}
+
+div[data-testid="stTextInput"] input {
+    background-color: #FFFFFF !important;
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
+    text-align: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    border: 1px solid #D8D4D1 !important;
+    border-radius: 7px !important;
+    color-scheme: light !important;
+}
+
+div[data-testid="stTextInput"] input:focus {
+    background-color: #FFFFFF !important;
+    color: #292529 !important;
+    -webkit-text-fill-color: #292529 !important;
+    border-color: #541F49 !important;
+    box-shadow: 0 0 0 1px #541F49 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -891,7 +905,7 @@ def score_resume_deterministic(resume_text, jd_text, required_skills, semantic_s
 
 
 # --------------------------------------------------------------------------
-# SIDEBAR
+# SESSION STATE
 # --------------------------------------------------------------------------
 if "shortlist_threshold" not in st.session_state:
     st.session_state.shortlist_threshold = 70
@@ -922,12 +936,40 @@ def update_threshold():
         st.session_state.threshold_text = str(st.session_state.shortlist_threshold)
 
 
+# --------------------------------------------------------------------------
+# SIDEBAR — branding + screening settings + threshold
+# --------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("<h2 style='margin-bottom:5px;'>Screening Settings</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#6F6A6D; font-size:14px;'>Configure how candidates are evaluated.</p>", unsafe_allow_html=True)
+
+    # ── Branding ──────────────────────────────────────────────────────────
+    st.image("assets/izra_logo_cropped.png", width=110)
+    st.markdown(
+        "<p style='font-size:13px; color:#6F6A6D; margin-top:2px; margin-bottom:16px;'>"
+        "AI-powered candidate screening</p>",
+        unsafe_allow_html=True
+    )
     st.markdown("---")
 
-    st.markdown("<p style='font-weight:600; color:#292529; font-size:15px; margin-bottom:8px;'>Shortlist Threshold</p>", unsafe_allow_html=True)
+    # ── Screening Settings ─────────────────────────────────────────────────
+    st.markdown(
+        "<h2 style='margin:20px 0 6px 0;'>Screening Settings</h2>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:15px; color:#6F6A6D; margin:0 0 28px 0; line-height:1.5;'>"
+        "Set your score cutoff for shortlisting.</p>",
+        unsafe_allow_html=True
+    )
+
+    # ── Step 3 / 3 — Shortlist Threshold ─────────────────────────────────
+    st.markdown(
+        "<div style='margin-bottom:10px;'><span class='step-label'>STEP 3 / 3</span></div>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<p style='font-size:20px; font-weight:700; color:#292529 !important; -webkit-text-fill-color:#292529 !important; margin:0 0 8px 0; line-height:1.4;'>Shortlist Threshold</p>",
+        unsafe_allow_html=True
+    )
 
     minus_col, value_col, plus_col = st.columns([1, 1.5, 1])
 
@@ -951,21 +993,36 @@ with st.sidebar:
 
 
 # --------------------------------------------------------------------------
-# UPLOAD SECTION HEADING
+# SECTION HEADINGS ROW  (3 columns — Step 1, Step 2, Step 3 at same level)
 # --------------------------------------------------------------------------
-st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Start Screening</h2>", unsafe_allow_html=True)
-st.markdown("<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>Complete both steps below, then click <b>Analyze Candidates</b>.</p>", unsafe_allow_html=True)
+heading_left, heading_right = st.columns(2, gap="large")
 
+with heading_left:
+    st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Start Screening</h2>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>"
+        "Upload your JD and candidate CVs, then click <b>Analyze Candidates</b>.</p>",
+        unsafe_allow_html=True
+    )
+
+with heading_right:
+    st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Candidate CVs</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>&nbsp;</p>", unsafe_allow_html=True)
+
+
+# --------------------------------------------------------------------------
+# UPLOAD COLUMNS  (3 columns at same row level)
+# --------------------------------------------------------------------------
 jd_col, cv_col = st.columns(2, gap="large")
 
 # --------------------------------------------------------------------------
-# JOB DESCRIPTION  (STEP 1 / 2)
+# JOB DESCRIPTION  (STEP 1 / 3)
 # --------------------------------------------------------------------------
 with jd_col:
     st.markdown(
         """
         <div style="margin-bottom: 10px;">
-            <span class="step-label">STEP 1 / 2</span>
+            <span class="step-label">STEP 1 / 3</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -990,13 +1047,13 @@ with jd_col:
 
 
 # --------------------------------------------------------------------------
-# CANDIDATE CVs  (STEP 2 / 2)
+# CANDIDATE CVs  (STEP 2 / 3)
 # --------------------------------------------------------------------------
 with cv_col:
     st.markdown(
         """
         <div style="margin-bottom: 10px;">
-            <span class="step-label">STEP 2 / 2</span>
+            <span class="step-label">STEP 2 / 3</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -1021,7 +1078,14 @@ with cv_col:
         )
 
     if resume_files:
-        st.caption(f"{len(resume_files)} resume{'s' if len(resume_files) != 1 else ''} added · Click + to add more")
+        st.markdown(
+            f"<p style='color:#292529; font-size:14px; margin-top:6px;'>"
+            f"{len(resume_files)} resume{'s' if len(resume_files) != 1 else ''} added</p>",
+            unsafe_allow_html=True
+        )
+
+
+
 
 
 # --------------------------------------------------------------------------
@@ -1037,6 +1101,8 @@ with button_col2:
         use_container_width=True
     )
 
+# Ensure shortlist_threshold is always defined before the pipeline
+shortlist_threshold = st.session_state.shortlist_threshold
 
 # --------------------------------------------------------------------------
 # MAIN PIPELINE
@@ -1148,7 +1214,7 @@ if analyze_clicked:
         if r["final_score"] >= shortlist_threshold
     ]
 
-    # ── RECOMMENDATION SECTION (before ranking) ────────────────────────────
+    # ── RECOMMENDATION SECTION ─────────────────────────────────────────────
     st.markdown("<div id='results-anchor'></div>", unsafe_allow_html=True)
     st.divider()
 
