@@ -746,7 +746,7 @@ def parse_json_response(text):
 
 
 def get_llm():
-    return ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
+    return ChatGoogleGenerativeAI(model="gemini-3.5-flash", temperature=0)
 
 
 # --------------------------------------------------------------------------
@@ -993,7 +993,7 @@ with st.sidebar:
 
 
 # --------------------------------------------------------------------------
-# SECTION HEADINGS ROW  (3 columns — Step 1, Step 2, Step 3 at same level)
+# SECTION HEADINGS ROW
 # --------------------------------------------------------------------------
 heading_left, heading_right = st.columns(2, gap="large")
 
@@ -1001,17 +1001,16 @@ with heading_left:
     st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Start Screening</h2>", unsafe_allow_html=True)
     st.markdown(
         "<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>"
-        "Upload your JD and candidate CVs, then click <b>Analyze Candidates</b>.</p>",
+        "Upload your JD and candidate CVs, set threshold then click <b>Analyze Candidates</b>.</p>",
         unsafe_allow_html=True
     )
 
 with heading_right:
-    st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Candidate CVs</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>&nbsp;</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; margin-top:20px; line-height:1.6;'>&nbsp;</p>", unsafe_allow_html=True)
 
 
 # --------------------------------------------------------------------------
-# UPLOAD COLUMNS  (3 columns at same row level)
+# UPLOAD COLUMNS
 # --------------------------------------------------------------------------
 jd_col, cv_col = st.columns(2, gap="large")
 
@@ -1083,9 +1082,6 @@ with cv_col:
             f"{len(resume_files)} resume{'s' if len(resume_files) != 1 else ''} added</p>",
             unsafe_allow_html=True
         )
-
-
-
 
 
 # --------------------------------------------------------------------------
@@ -1260,69 +1256,88 @@ if analyze_clicked:
         )
 
     # ── CANDIDATE RANKING ──────────────────────────────────────────────────
-    st.markdown("<h2 style='margin-top:8px; margin-bottom:16px;'>🏆 Candidate Ranking</h2>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class="rec-section" style="margin-top:8px;">
+            <div class="rec-eyebrow">Rankings</div>
+            <div class="rec-heading">🏆 Candidate Ranking</div>
+            <div class="rec-subtext">All candidates ranked by ATS score from highest to lowest.</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     for rank, r in enumerate(results, start=1):
         shortlisted = r["final_score"] >= shortlist_threshold
 
-        with st.container(border=True):
-            top = st.columns([0.5, 3, 1, 1.5])
+        badge_html = (
+            "<span style='background:#E8F5E9; color:#2E7D32; border:1px solid #A5D6A7; "
+            "border-radius:6px; padding:5px 14px; font-size:14px; font-weight:700;'>✓ Shortlisted</span>"
+            if shortlisted else
+            "<span style='background:#FDECEC; color:#C62828; border:1px solid #EF9A9A; "
+            "border-radius:6px; padding:5px 14px; font-size:14px; font-weight:700;'>✕ Not Shortlisted</span>"
+        )
 
-            with top[0]:
-                st.markdown(
-                    f"<h3 style='color:#292529 !important; font-size:20px; font-weight:700;'>#{rank}</h3>",
-                    unsafe_allow_html=True
-                )
+        rank_medal = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, f"#{rank}")
 
-            with top[1]:
-                st.markdown(f"### {r['candidate_name']}")
+        score_color = "#2E7D32" if r['final_score'] >= shortlist_threshold else "#C62828"
 
-            with top[2]:
-                st.metric("ATS Score", f"{r['final_score']}%")
+        st.markdown(
+            f"""
+            <div style="
+                background:#FFFFFF;
+                border: 1.5px solid #D4B8D0;
+                border-radius:12px;
+                padding:20px 24px;
+                margin-bottom:14px;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                flex-wrap:wrap;
+                gap:12px;
+            ">
+                <div style="display:flex; align-items:center; gap:16px; flex:1; min-width:200px;">
+                    <div style="
+                        font-size:22px; font-weight:800; color:#541F49;
+                        background:#EDE0EC; border:1.5px solid #C9A8C4;
+                        border-radius:8px; padding:6px 14px; white-space:nowrap;
+                    ">{rank_medal}</div>
+                    <div>
+                        <div style="font-size:16px; font-weight:700; color:#292529;">{r['candidate_name']}</div>
+                        <div style="font-size:13px; color:#6F6A6D; margin-top:2px;">ATS Score</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                    <div style="
+                        font-size:28px; font-weight:800; color:{score_color};
+                        min-width:70px; text-align:center;
+                    ">{r['final_score']}%</div>
+                    {badge_html}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-            with top[3]:
-                if shortlisted:
-                    st.markdown(
-                        """
-                        <div style="
-                            background-color:#E8F5E9; color:#2E7D32;
-                            padding:10px 16px; border-radius:8px;
-                            font-size:15px; font-weight:700; text-align:center;
-                        ">✓ Shortlisted</div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.markdown(
-                        """
-                        <div style="
-                            background-color:#FDECEC; color:#C62828;
-                            padding:10px 17px; border-radius:8px;
-                            font-size:15px; font-weight:700; text-align:center;
-                        ">✕ Not shortlisted</div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+        with st.expander(f"View Details — {r['candidate_name']}"):
+            c1, c2, c3, c4, c5 = st.columns(5)
+            c1.metric("Skill Match", f"{r.get('skill_match', 0)}%")
+            c2.metric("Experience", f"{r.get('experience_score', 0)}%")
+            c3.metric("Education", f"{r.get('education_score', 0)}%")
+            c4.metric("Projects", f"{r.get('projects_score', 0)}%")
+            c5.metric("Formatting", f"{r.get('formatting_score', 0)}%")
 
-            with st.expander("View Details"):
-                c1, c2, c3, c4, c5 = st.columns(5)
-                c1.metric("Skill Match", f"{r.get('skill_match', 0)}%")
-                c2.metric("Experience", f"{r.get('experience_score', 0)}%")
-                c3.metric("Education", f"{r.get('education_score', 0)}%")
-                c4.metric("Projects", f"{r.get('projects_score', 0)}%")
-                c5.metric("Formatting", f"{r.get('formatting_score', 0)}%")
+            d1, d2 = st.columns(2)
 
-                d1, d2 = st.columns(2)
+            with d1:
+                st.markdown("**✅ Matched Skills**")
+                for skill in r.get("matched_skills", []):
+                    st.markdown(f"- {skill}")
 
-                with d1:
-                    st.markdown("**✅ Matched Skills**")
-                    for skill in r.get("matched_skills", []):
-                        st.markdown(f"- {skill}")
-
-                with d2:
-                    st.markdown("**❌ Missing Skills**")
-                    for skill in r.get("missing_skills", []):
-                        st.markdown(f"- {skill}")
+            with d2:
+                st.markdown("**❌ Missing Skills**")
+                for skill in r.get("missing_skills", []):
+                    st.markdown(f"- {skill}")
 
     # ── Smooth-scroll down to the results section ───────────────────────────
     st.markdown(
