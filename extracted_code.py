@@ -47,29 +47,47 @@ st.markdown("""
 }
 
 /* =========================================================
-   PAGE-LEVEL SCROLLBAR (thin, dark gray, far right edge)
+   SCROLLBAR — FLAT BLACK, NO HOVER, NO GREY (applies everywhere)
    ========================================================= */
-html {
-    scrollbar-width: thin;
-    scrollbar-color: #8A8386 #F7F6F4;
+* {
+    scrollbar-width: auto !important;
+    scrollbar-color: #000000 transparent !important;
 }
 
-html::-webkit-scrollbar {
-    width: 9px;
+*::-webkit-scrollbar {
+    width: 14px !important;
+    height: 14px !important;
 }
 
-html::-webkit-scrollbar-track {
-    background: #F7F6F4;
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track:hover,
+*::-webkit-scrollbar-track:active {
+    background: transparent !important;
 }
 
-html::-webkit-scrollbar-thumb {
-    background-color: #8A8386;
-    border-radius: 5px;
-    border: 2px solid #F7F6F4;
+*::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:active {
+    background: #000000 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    min-height: 60px !important;
 }
 
-html::-webkit-scrollbar-thumb:hover {
-    background-color: #6F6A6D;
+*::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+*::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+*::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 /* =========================================================
@@ -226,7 +244,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
 }
 
 /* =========================================================
-   FILE UPLOADER LABEL — black text, hover-only tooltip icon
+   FILE UPLOADER LABEL
    ========================================================= */
 [data-testid="stFileUploader"] label {
     color: #292529 !important;
@@ -236,7 +254,6 @@ section[data-testid="stSidebar"] .stButton > button:active {
     line-height: 1.5 !important;
 }
 
-/* Hide the ? button by default, show only on hover */
 [data-testid="stFileUploader"] [data-testid="stTooltipHoverTarget"] {
     opacity: 0 !important;
     transition: opacity 0.15s ease !important;
@@ -279,7 +296,6 @@ section[data-testid="stSidebar"] .stButton > button:active {
     box-shadow: none !important;
 }
 
-/* Style the small × delete button on uploaded file chips */
 [data-testid="stFileUploaderDeleteBtn"] button {
     background-color: transparent !important;
     border: none !important;
@@ -291,14 +307,7 @@ section[data-testid="stSidebar"] .stButton > button:active {
 
 /* =========================================================
    ADD MORE FILES (+) BUTTON
-   ---------------------------------------------------------
-   Streamlit owns this button and its click behavior. We only
-   style the real button; we do NOT hide/replace its children.
-   This styling now applies ONLY inside the Candidate CV
-   uploader (scoped via #cv-uploader-anchor + general sibling),
-   since the JD uploader's "+" button is hidden entirely below.
    ========================================================= */
-
 [data-testid="stFileUploaderFileList"] + div button,
 [data-testid="stFileUploaderFileList"] ~ div button {
     background-color: #EDE0EC !important;
@@ -345,8 +354,6 @@ section[data-testid="stSidebar"] .stButton > button:active {
 
 /* =========================================================
    DROPZONE
-   ---------------------------------------------------------
-   Keep Streamlit's uploader behavior intact.
    ========================================================= */
 [data-testid="stFileUploaderDropzone"] {
     min-height: 80px !important;
@@ -362,60 +369,44 @@ section[data-testid="stSidebar"] .stButton > button:active {
 
 /* =========================================================
    JD UPLOADER — hide "Add files" (+) button entirely.
-   Scoped via st.container(key="jd_upload_container"), which
-   Streamlit renders as a real wrapper div carrying the class
-   "st-key-jd_upload_container". This is a reliable anchor,
-   unlike a plain markdown marker (which is not a true DOM
-   sibling of the widget).
    ========================================================= */
 .st-key-jd_upload_container [data-testid="stFileUploader"] button[aria-label="Add files"] {
     display: none !important;
 }
 
-/* Also remove any leftover spacing where that button used to sit */
 .st-key-jd_upload_container [data-testid="stFileUploaderFileList"] + div {
     margin-top: 0 !important;
 }
 
 /* =========================================================
-   CANDIDATE CV UPLOADER — fixed max height + internal scroll
-   with a clearly visible thin dark-gray scrollbar, scoped via
-   st.container(key="cv_upload_container").
+   CV UPLOADER — scrollable file list, always-visible thumb
+   =========================================================
+   WHY stFileUploaderFileList and not stFileUploader:
+   The scrollbar only appears on the element that actually
+   overflows. Streamlit renders uploaded file entries inside
+   [data-testid="stFileUploaderFileList"], which is the true
+   scroll container. Styling the parent stFileUploader has no
+   effect on webkit-scrollbar pseudo-elements because those
+   only apply to the element with overflow set on it.
    ========================================================= */
-.st-key-cv_upload_container [data-testid="stFileUploader"] {
-    max-height: 300px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding-right: 10px !important;
-    scrollbar-width: auto !important;
-    scrollbar-color: #4A4A4A #D8D4D1 !important;
-}
-
-.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar {
-    width: 12px !important;
-}
-
-.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-track {
-    background: #D8D4D1 !important;
-    border-radius: 6px !important;
-}
-
-.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-thumb {
-    background-color: #4A4A4A !important;
-    border-radius: 6px !important;
-    border: 2px solid #D8D4D1 !important;
-}
-
-.st-key-cv_upload_container [data-testid="stFileUploader"]::-webkit-scrollbar-thumb:hover {
-    background-color: #2E2E2E !important;
-}
-
-.st-key-cv_upload_container [data-testid="stFileUploaderDropzone"] {
-    flex-shrink: 0 !important;
-}
-
 .st-key-cv_upload_container [data-testid="stFileUploaderFileList"] {
-    overflow: visible !important;
+    max-height: 200px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploaderFileList"]::-webkit-scrollbar {
+    width: 14px !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploaderFileList"]::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.st-key-cv_upload_container [data-testid="stFileUploaderFileList"]::-webkit-scrollbar-thumb {
+    background: #000000 !important;
+    border-radius: 10px !important;
+    min-height: 60px !important;
 }
 
 /* =========================================================
@@ -500,14 +491,6 @@ hr { border-color: #DDD9D7 !important; }
    GENERAL MARKDOWN
    ========================================================= */
 .stMarkdown { font-size: 16px; }
-
-/* =========================================================
-   SCROLLBAR (legacy global rule, retained + refined above)
-   ========================================================= */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #F7F6F4; }
-::-webkit-scrollbar-thumb { background: #8A8386; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #6F6A6D; }
 
 /* =========================================================
    RESULT CARD TEXT
@@ -652,22 +635,19 @@ hr { border-color: #DDD9D7 !important; }
     color: #B94A32;
 }
 
-
-/* Change the CV uploader's + button to "Upload More" (JD uploader's
-   + button is hidden entirely above, so this only affects the CV one) */
-
+/* =========================================================
+   CV UPLOADER — "Upload More" button label
+   ========================================================= */
 [data-testid="stFileUploader"] button[aria-label="Add files"] {
     width: 105px !important;
     height: 42px !important;
     font-size: 0 !important;
 }
 
-/* Hide the + icon */
 [data-testid="stFileUploader"] button[aria-label="Add files"] svg {
     display: none !important;
 }
 
-/* Show Upload More text */
 [data-testid="stFileUploader"] button[aria-label="Add files"]::before {
     content: "Upload More" !important;
     font-size: 15px !important;
@@ -675,7 +655,6 @@ hr { border-color: #DDD9D7 !important; }
     line-height: 1 !important;
     white-space: nowrap !important;
 }
-
 
 </style>
 """, unsafe_allow_html=True)
@@ -1001,9 +980,6 @@ with jd_col:
         unsafe_allow_html=True
     )
 
-    # Wrapped in a keyed container so CSS can reliably scope the
-    # "Add files +" button removal to this uploader only (JD stays
-    # single-file — no Upload More button here).
     with st.container(key="jd_upload_container"):
         jd_file = st.file_uploader(
             "Upload Job Description",
@@ -1035,10 +1011,6 @@ with cv_col:
         unsafe_allow_html=True
     )
 
-    # Wrapped in a keyed container so CSS can reliably scope the
-    # fixed max-height + scrollbar behavior to this uploader only.
-    # The "Upload More +" button stays visible here — candidates
-    # can have multiple resumes.
     with st.container(key="cv_upload_container"):
         resume_files = st.file_uploader(
             "Upload Candidate CVs",
