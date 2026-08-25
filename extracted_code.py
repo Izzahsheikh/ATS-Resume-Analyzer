@@ -670,6 +670,7 @@ div[data-testid="stTextInput"] input:focus {
     box-shadow: 0 0 0 1px #541F49 !important;
 }
 
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -809,20 +810,38 @@ def compute_semantic_similarity(jd_embedding, resume_embeddings):
 # --------------------------------------------------------------------------
 # STEP 3: Deterministic scoring
 # --------------------------------------------------------------------------
-def compute_skill_match(resume_text, required_skills):
+def compute_skill_match(resume_text, required_skills, skill_embeddings):
     if not required_skills:
         return 0, [], []
 
-    chunks = [line.strip() for line in resume_text.splitlines() if len(line.strip()) >= 15]
+    chunks = [
+        line.strip()
+        for line in resume_text.splitlines()
+        if len(line.strip()) >= 15
+    ]
+
     if not chunks:
         return 0, [], []
 
     model = get_embedding_model()
-    skill_embeddings = model.encode(required_skills, batch_size=32, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False)
-    chunk_embeddings = model.encode(chunks, batch_size=32, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False)
 
-    similarities = np.dot(skill_embeddings, chunk_embeddings.T)
+    # Only generate embeddings for this resume's text chunks.
+    # Skill embeddings are already generated once outside.
+    chunk_embeddings = model.encode(
+        chunks,
+        batch_size=32,
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False
+    )
+
+    similarities = np.dot(
+        skill_embeddings,
+        chunk_embeddings.T
+    )
+
     matched, missing = [], []
+
     MATCH_THRESHOLD = 0.50
 
     for skill, skill_sims in zip(required_skills, similarities):
@@ -831,7 +850,10 @@ def compute_skill_match(resume_text, required_skills):
         else:
             missing.append(skill)
 
-    score = round(len(matched) / len(required_skills) * 100)
+    score = round(
+        len(matched) / len(required_skills) * 100
+    )
+
     return score, matched, missing
 
 
@@ -878,7 +900,11 @@ def score_formatting(resume_text):
 
 
 def score_resume_deterministic(resume_text, jd_text, required_skills, semantic_score, resume_embedding, skill_embeddings):
-    skill_score, matched, missing = compute_skill_match(resume_text, required_skills)
+    skill_score, matched, missing = compute_skill_match(
+    resume_text,
+    required_skills,
+    skill_embeddings
+)
     combined_skill = round(skill_score * 0.7 + semantic_score * 0.3)
     experience_score = score_experience(resume_text, jd_text)
     education_score = score_education(resume_text)
@@ -963,10 +989,6 @@ with st.sidebar:
 
     # ── Step 3 / 3 — Shortlist Threshold ─────────────────────────────────
     st.markdown(
-        "<div style='margin-bottom:10px;'><span class='step-label'>STEP 3 / 3</span></div>",
-        unsafe_allow_html=True
-    )
-    st.markdown(
         "<p style='font-size:20px; font-weight:700; color:#292529 !important; -webkit-text-fill-color:#292529 !important; margin:0 0 8px 0; line-height:1.4;'>Shortlist Threshold</p>",
         unsafe_allow_html=True
     )
@@ -1001,7 +1023,7 @@ with heading_left:
     st.markdown("<h2 style='margin-top:20px; margin-bottom:6px;'>Start Screening</h2>", unsafe_allow_html=True)
     st.markdown(
         "<p style='color:#6F6A6D; font-size:16px; margin-bottom:28px; line-height:1.6;'>"
-        "Upload your JD and candidate CVs, set threshold then click <b>Analyze Candidates</b>.</p>",
+        "Upload your JD and candidate CVs, then click <b>Analyze Candidates</b>.</p>",
         unsafe_allow_html=True
     )
 
@@ -1015,13 +1037,13 @@ with heading_right:
 jd_col, cv_col = st.columns(2, gap="large")
 
 # --------------------------------------------------------------------------
-# JOB DESCRIPTION  (STEP 1 / 3)
+# JOB DESCRIPTION  (STEP 1 / 2)
 # --------------------------------------------------------------------------
 with jd_col:
     st.markdown(
         """
         <div style="margin-bottom: 10px;">
-            <span class="step-label">STEP 1 / 3</span>
+            <span class="step-label">STEP 1 / 2</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -1046,13 +1068,13 @@ with jd_col:
 
 
 # --------------------------------------------------------------------------
-# CANDIDATE CVs  (STEP 2 / 3)
+# CANDIDATE CVs  (STEP 2 / 2)
 # --------------------------------------------------------------------------
 with cv_col:
     st.markdown(
         """
         <div style="margin-bottom: 10px;">
-            <span class="step-label">STEP 2 / 3</span>
+            <span class="step-label">STEP 2 / 2</span>
         </div>
         """,
         unsafe_allow_html=True
@@ -1292,11 +1314,11 @@ if analyze_clicked:
                 margin-bottom:14px;
                 display:flex;
                 align-items:center;
-                justify-content:space-between;
+                justify-content:flex-start;
                 flex-wrap:wrap;
                 gap:12px;
             ">
-                <div style="display:flex; align-items:center; gap:16px; flex:1; min-width:200px;">
+                <div style="display:flex; align-items:center; gap:16px; min-width:200px;">
                     <div style="
                         font-size:22px; font-weight:800; color:#541F49;
                         background:#EDE0EC; border:1.5px solid #C9A8C4;
@@ -1307,7 +1329,7 @@ if analyze_clicked:
                         <div style="font-size:13px; color:#6F6A6D; margin-top:2px;">ATS Score</div>
                     </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;margin-left:70px;">
                     <div style="
                         font-size:28px; font-weight:800; color:{score_color};
                         min-width:70px; text-align:center;
