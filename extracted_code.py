@@ -748,6 +748,102 @@ def parse_json_response(text):
 
 def get_llm():
     return ChatGoogleGenerativeAI(model="gemini-3.5-flash", temperature=0)
+<<<<<<< Updated upstream
+=======
+
+
+# --------------------------------------------------------------------------
+# EMBEDDING MODEL — cached once for entire session
+# --------------------------------------------------------------------------
+@st.cache_resource
+def get_embedding_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+
+# --------------------------------------------------------------------------
+# OPTIMIZATION 1: Single batch encode for ALL texts at once
+# Encodes JD + all resumes + all skills in ONE model.encode() call
+# --------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def batch_encode_all(
+    jd_text: str,
+    resume_texts: tuple,
+    skill_texts: tuple,
+) -> tuple:
+    model = get_embedding_model()
+    all_texts = [jd_text] + list(resume_texts) + list(skill_texts)
+    all_embeddings = model.encode(
+        all_texts,
+        batch_size=256,            # IMPROVED: larger batch
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    )
+    jd_embedding      = all_embeddings[0]
+    n_resumes         = len(resume_texts)
+    resume_embeddings = all_embeddings[1 : 1 + n_resumes]
+    skill_embeddings  = all_embeddings[1 + n_resumes :]
+    return jd_embedding, resume_embeddings, skill_embeddings
+
+
+# --------------------------------------------------------------------------
+# OPTIMIZATION 2: Pre-encode ALL resume chunks in ONE batch call
+# Returns dict: { resume_name -> np.ndarray of chunk embeddings }
+# This eliminates per-resume encode() calls inside compute_skill_match
+# --------------------------------------------------------------------------
+@st.cache_data(show_spinner=False)
+def batch_encode_all_chunks(resume_texts: tuple, resume_names: tuple) -> dict:
+    """
+    Encodes every line/chunk from every resume in a single model.encode() call.
+    Previously each resume re-encoded its own chunks separately — N encode calls.
+    Now it's ONE call regardless of how many resumes there are.
+    """
+    model = get_embedding_model()
+
+    all_chunks  = []
+    chunk_owner = []  # tracks which resume each chunk belongs to
+
+    for name, text in zip(resume_names, resume_texts):
+        chunks = [l.strip() for l in text.splitlines() if len(l.strip()) >= 15]
+        all_chunks.extend(chunks)
+        chunk_owner.extend([name] * len(chunks))
+
+    if not all_chunks:
+        return {name: np.array([]) for name in resume_names}
+
+    # Single encode for ALL chunks across ALL resumes
+    all_embeddings = model.encode(
+        all_chunks,
+        batch_size=256,            # IMPROVED: larger batch
+        convert_to_numpy=True,
+        normalize_embeddings=True,
+        show_progress_bar=False,
+    )
+
+    # Split embeddings back by resume owner
+    chunk_embedding_map: dict = {}
+    for i, owner in enumerate(chunk_owner):
+        if owner not in chunk_embedding_map:
+            chunk_embedding_map[owner] = []
+        chunk_embedding_map[owner].append(all_embeddings[i])
+
+    # Convert lists to np arrays
+    return {
+        name: np.array(chunk_embedding_map[name]) if name in chunk_embedding_map else np.array([])
+        for name in resume_names
+    }
+
+
+# --------------------------------------------------------------------------
+# SEMANTIC SIMILARITY
+# --------------------------------------------------------------------------
+def compute_semantic_similarity(
+    jd_embedding: np.ndarray,
+    resume_embeddings: np.ndarray,
+) -> list:
+    similarities = np.dot(resume_embeddings, jd_embedding)
+    return [round(float(s) * 100) for s in similarities]
+>>>>>>> Stashed changes
 
 
 # --------------------------------------------------------------------------
