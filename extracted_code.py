@@ -850,7 +850,7 @@ def compute_semantic_similarity(
 # STEP 1: Extract required skills from JD
 # --------------------------------------------------------------------------
 JD_SKILLS_PROMPT = PromptTemplate(
-    input_variables=["job_description"],
+    input_variables=["job_description"], 
     template="""
 You are a technical recruiter. Read the job description below and extract the specific
 technical skills, tools, frameworks, and technologies required for this role.
