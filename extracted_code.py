@@ -748,8 +748,6 @@ def parse_json_response(text):
 
 def get_llm():
     return ChatGoogleGenerativeAI(model="gemini-3.5-flash", temperature=0)
-<<<<<<< Updated upstream
-=======
 
 
 # --------------------------------------------------------------------------
@@ -843,7 +841,6 @@ def compute_semantic_similarity(
 ) -> list:
     similarities = np.dot(resume_embeddings, jd_embedding)
     return [round(float(s) * 100) for s in similarities]
->>>>>>> Stashed changes
 
 
 # --------------------------------------------------------------------------
